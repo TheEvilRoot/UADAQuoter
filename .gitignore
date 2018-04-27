@@ -1,0 +1,11 @@
+.*/
+build/
+gradle/
+gradlew.bat
+gradlew
+*.properties
+*.iml
+*.pro
+app/src/androidTest/
+app/src/test
+PrivateReferences.kt
