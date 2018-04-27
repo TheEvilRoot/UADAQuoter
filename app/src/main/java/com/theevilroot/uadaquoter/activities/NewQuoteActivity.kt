@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
@@ -22,6 +23,7 @@ import org.jsoup.Jsoup
 import kotlin.concurrent.thread
 // Change it to com.theevilroot.uadaquoter.References.CODE_PREFIX
 import com.theevilroot.uadaquoter.PrivateReferences.CODE_PREFIX
+import java.io.File
 
 class NewQuoteActivity: AppCompatActivity() {
 
@@ -95,10 +97,19 @@ class NewQuoteActivity: AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.add_quote_toolbar, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == android.R.id.home) {
-            finish()
+        when(item.itemId) {
+            android.R.id.home -> finish()
+            R.id.tb_personal_data -> {
+                TODO("Доделать завтра! Уже галава кепит сегодня!")
+            }
         }
+
         return super.onOptionsItemSelected(item)
     }
 

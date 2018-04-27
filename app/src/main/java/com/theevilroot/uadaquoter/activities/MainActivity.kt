@@ -58,6 +58,24 @@ class MainActivity: AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
         load()
+        loadUserdata()
+    }
+
+    private fun loadUserdata() {
+        thread(true)  {
+            val file = File(filesDir, "user.json")
+            try {
+                app.adderName = if (file.exists()) {
+                    JsonParser().parse(file.readText()).asJsonObject["adderName"].asString
+                } else {
+                    ""
+                }
+            }catch (e: Exception) {
+                if(file.exists())
+                    file.delete()
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun showLoading() {
