@@ -25,11 +25,19 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Point
 import android.graphics.Rect
+import android.net.Uri
+import android.provider.MediaStore
 import android.support.constraint.ConstraintLayout
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import com.google.zxing.EncodeHintType
 import kotlinx.android.synthetic.main.main_activity.*
+import net.glxn.qrgen.android.BmpUtil
+import net.glxn.qrgen.android.MatrixToImageWriter
+import net.glxn.qrgen.android.QRCode
+import net.glxn.qrgen.core.image.ImageType
+import java.net.URLEncoder
 
 
 class MainActivity: AppCompatActivity() {
@@ -57,6 +65,24 @@ class MainActivity: AppCompatActivity() {
         searchStatus = findViewById(R.id.search_status)
         setSupportActionBar(toolbar)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
+        quotesList.setOnItemLongClickListener { parent, view, position, id ->
+            if(quotesList.adapter == null)
+                return@setOnItemLongClickListener false
+            if(quotesList.adapter.count == 0)
+                return@setOnItemLongClickListener false
+            val item = quotesList.adapter.getItem(position) as Quote? ?: return@setOnItemLongClickListener false
+            val qr = QRCode.from("UAQ:;:${item.id}:;:${item.author}:;:${item.adder}:;:${item.text}").withCharset("UTF-8").withSize(1024,1024).withHint(EncodeHintType.CHARACTER_SET, "UTF-8")
+           //  val uri = Uri.parse(MediaStore.Images.Media.insertImage(contentResolver, qr.bitmap(), "quote", null))
+            val dview = layoutInflater.inflate(R.layout.quote_qr_layout, null)
+            val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(dview).setPositiveButton("Ok", {di, _ -> di.dismiss()}).setNeutralButton("Сохранить", {di, _ ->
+                MediaStore.Images.Media.insertImage(contentResolver, qr.bitmap(), "" , "")
+            }).setNegativeButton("Поделиццо", {di, _ ->
+            }).create()
+            val image = dview.findViewById<ImageView>(R.id.quote_qr_image)
+            image.setImageBitmap(qr.bitmap())
+            dialog.show()
+            true
+        }
         load()
         loadUserdata()
     }
@@ -230,5 +256,4 @@ class MainActivity: AppCompatActivity() {
         searchMode = false
         invalidateOptionsMenu()
     }
-
 }
