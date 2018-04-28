@@ -14,6 +14,8 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.R
@@ -95,6 +97,7 @@ class NewQuoteActivity: AppCompatActivity() {
             }))
             dialog.show()
         }
+        adderView.setText(app.adderName)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -106,7 +109,31 @@ class NewQuoteActivity: AppCompatActivity() {
         when(item.itemId) {
             android.R.id.home -> finish()
             R.id.tb_personal_data -> {
-                TODO("Доделать завтра! Уже галава кепит сегодня!")
+                val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
+                val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
+                val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
+                val saveButton = view.findViewById<Button>(R.id.personal_data_save)
+                adderNameView.setText(app.adderName)
+                saveButton.setOnClickListener {
+                    val name = adderNameView.text.toString()
+                    if(name == app.adderName) {
+                        dialog.dismiss()
+                        return@setOnClickListener
+                    }
+                    showStatus("Изменение данных", android.R.color.holo_green_light, Runnable {
+                        val file = File(filesDir, "user.json")
+                        if(!file.exists())
+                            file.createNewFile()
+                        val json = JsonObject()
+                        json.addProperty("adderName", name)
+                        file.writeText(GsonBuilder().setPrettyPrinting().create().toJson(json))
+                        app.adderName = name
+                        runOnUiThread { statusView.text = "Изменено!" }
+                        Thread.sleep(1000)
+                    })
+                    dialog.dismiss()
+                }
+                dialog.show()
             }
         }
 
