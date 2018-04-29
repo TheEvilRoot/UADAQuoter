@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimaryDark"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp"
+    tools:context=".activities.MainActivity">
+
+    <ImageButton
+        android:id="@+id/search_overlay_close"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@drawable/search_field_bg"
+        android:paddingBottom="0dp"
+        android:paddingEnd="5dp"
+        android:paddingStart="5dp"
+        android:paddingTop="0dp"
+        android:src="@drawable/window_close"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:singleLine="true"
+        android:id="@+id/search_overlay_field"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search_field_bg"
+        android:fontFamily="sans-serif-condensed"
+        android:hint="Поиск..."
+        android:padding="10dp"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/search_overlay_ignore_case"
+        app:layout_constraintStart_toEndOf="@+id/search_overlay_close"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.theevilroot.uadaquoter.IgnoreCaseButton
+        android:id="@+id/search_overlay_ignore_case"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@drawable/search_field_bg"
+        android:contentDescription="Ignore case"
+        android:paddingBottom="0dp"
+        android:paddingEnd="5dp"
+        android:paddingStart="5dp"
+        android:paddingTop="0dp"
+        android:src="@drawable/format_size"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>

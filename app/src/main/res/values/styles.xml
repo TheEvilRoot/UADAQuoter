@@ -10,7 +10,7 @@
     </style>
 
     <style name="AppTheme.Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/search_bg</item>
+        <item name="android:windowBackground">@drawable/dialog_bg</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>

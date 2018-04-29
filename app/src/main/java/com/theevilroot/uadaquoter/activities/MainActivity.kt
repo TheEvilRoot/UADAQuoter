@@ -10,9 +10,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.theevilroot.uadaquoter.App
-import com.theevilroot.uadaquoter.Quote
-import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import org.jsoup.Jsoup
 import java.io.File
@@ -31,6 +28,7 @@ import android.support.constraint.ConstraintLayout
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import com.theevilroot.uadaquoter.*
 import kotlinx.android.synthetic.main.main_activity.*
 import java.net.URLEncoder
 
@@ -47,7 +45,6 @@ class MainActivity: AppCompatActivity() {
 
     var quotes: ArrayList<Quote> = ArrayList()
     var searchMode: Boolean = false
-    var ignoreCase: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +57,7 @@ class MainActivity: AppCompatActivity() {
         searchStatus = findViewById(R.id.search_status)
         setSupportActionBar(toolbar)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
+        supportActionBar!!.title = "Цитаты"
         load()
         loadUserdata()
     }
@@ -74,8 +72,6 @@ class MainActivity: AppCompatActivity() {
                     ""
                 }
             }catch (e: Exception) {
-                if(file.exists())
-                    file.delete()
                 e.printStackTrace()
             }
         }
@@ -175,36 +171,24 @@ class MainActivity: AppCompatActivity() {
         when(item.itemId) {
             R.id.tb_reload -> load()
             R.id.tb_search -> {
-                val view = layoutInflater.inflate(R.layout.search_layout, null, false)
-                val searchField = view.findViewById<EditText>(R.id.search_field)
-                val ignoreCaseSwitch = view.findViewById<Switch>(R.id.switch1)
-                val searchButton = view.findViewById<Button>(R.id.search_button)
-                val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
-                ignoreCaseSwitch.isChecked = ignoreCase
-                searchButton.setOnClickListener ({ _ ->
-                    var str = searchField.text.toString()
-                    if(ignoreCaseSwitch.isChecked)
-                        str = str.toLowerCase()
-                    val list = quotes.filter {
-                        var (id, adder, author, text) = it
-                        if(ignoreCaseSwitch.isChecked) {
-                            text = text.toLowerCase()
-                            adder = adder.toLowerCase()
-                            author = author.toLowerCase()
-                        }
-                        text.contains(str) || adder.contains(str) || author.contains(str) || id.toString() == str
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val view = findViewById<View>(R.id.search_overlay)
+                val searchField = view.findViewById<EditText>(R.id.search_overlay_field)
+                val ignoreCaseButton = view.findViewById<IgnoreCaseButton>(R.id.search_overlay_ignore_case)
+                val closeSearchButton = view.findViewById<ImageButton>(R.id.search_overlay_close)
+                searchField.addTextChangedListener(TextWatcherWrapper(onChange = { s, _,_,_ -> onSearch(s, ignoreCaseButton) }))
+                searchField.setOnKeyListener { v, keyCode, event ->
+                    if(event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                        view.visibility = View.GONE
+                        imm.hideSoftInputFromWindow(view.windowToken, 0)
                     }
-                    ignoreCase = ignoreCaseSwitch.isChecked
-                    quotesList.adapter = QuotesAdapter(this, list.toTypedArray())
-                    supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-                    searchMode = true
-                    invalidateOptionsMenu()
-                    supportActionBar!!.title = "Результаты поиска"
-                    supportActionBar!!.subtitle = str
-                    searchStatus.visibility = if(list.isEmpty()) { View.VISIBLE }else{ View.GONE }
-                    dialog.dismiss()
-                })
-                dialog.show()
+                    false
+                }
+                ignoreCaseButton.setOnClickListener { ignoreCaseButton.turnIgnoreCase() ; onSearch(searchField.text.toString(), ignoreCaseButton) }
+                closeSearchButton.setOnClickListener { view.visibility = View.GONE ; imm.hideSoftInputFromWindow(view.windowToken, 0);}
+                view.visibility = View.VISIBLE
+                searchField.requestFocus()
+                imm.showSoftInput(searchField, 0)
             }
 
             R.id.tb_add -> {
@@ -212,25 +196,62 @@ class MainActivity: AppCompatActivity() {
             }
 
             android.R.id.home -> {
-                closeSearch()
+                closeSearch(findViewById<View>(R.id.search_overlay))
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onBackPressed() {
+        val view = findViewById<View>(R.id.search_overlay)
         if(searchMode) {
-            closeSearch()
+            closeSearch(findViewById<View>(R.id.search_overlay))
         }else{
+            if(view.visibility != View.GONE)
+                view.visibility = View.GONE
             super.onBackPressed()
         }
     }
 
-    private fun closeSearch() {
+    private fun closeSearch(view: View) {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        with(currentFocus) {
+            if(this != null)
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+        view.findViewById<EditText>(R.id.search_overlay_field).setText("")
+        view.visibility = View.GONE
         searchStatus.visibility = View.GONE
         updateUI()
         supportActionBar!!.setDisplayHomeAsUpEnabled(false)
         searchMode = false
         invalidateOptionsMenu()
+    }
+
+    private fun onSearch(searchValue: String, ignoreCaseButton: IgnoreCaseButton) {
+        val str = if(ignoreCaseButton.value)
+            searchValue.toLowerCase()
+        else
+            searchValue
+        val list: List<Quote> = if(searchValue.isNotBlank()) {
+            quotes.filter {
+                var (id, adder, author, text) = it
+                if (ignoreCaseButton.value) {
+                    text = text.toLowerCase()
+                    adder = adder.toLowerCase()
+                    author = author.toLowerCase()
+                }
+                text.contains(str) || adder.contains(str) || author.contains(str) || id.toString() == str
+            }
+        }else{
+            emptyList()
+        }
+        quotesList.adapter = QuotesAdapter(this, list.toTypedArray())
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        searchMode = true
+        invalidateOptionsMenu()
+        supportActionBar!!.title = "Результаты поиска"
+        supportActionBar!!.subtitle = str
+        searchStatus.visibility = if(list.isEmpty()) { View.VISIBLE }else{ View.GONE }
     }
 }
