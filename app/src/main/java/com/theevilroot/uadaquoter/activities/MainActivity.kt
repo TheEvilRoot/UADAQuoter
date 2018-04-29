@@ -31,12 +31,7 @@ import android.support.constraint.ConstraintLayout
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import com.google.zxing.EncodeHintType
 import kotlinx.android.synthetic.main.main_activity.*
-import net.glxn.qrgen.android.BmpUtil
-import net.glxn.qrgen.android.MatrixToImageWriter
-import net.glxn.qrgen.android.QRCode
-import net.glxn.qrgen.core.image.ImageType
 import java.net.URLEncoder
 
 
