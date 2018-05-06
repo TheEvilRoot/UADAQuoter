@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.theevilroot.uadaquoter.Quote
 import com.theevilroot.uadaquoter.R
-import org.w3c.dom.Text
 
 class QuotesAdapter(context: Context, items: Array<Quote>): ArrayAdapter<Quote>(context, R.layout.quote_list_item, items) {
 
