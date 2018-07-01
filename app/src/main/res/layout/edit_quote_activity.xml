@@ -40,8 +40,8 @@
             android:text="Автор"
             android:textColor="@android:color/white" />
 
-        <EditText
-            android:id="@+id/aq_author"
+        <AutoCompleteTextView
+            android:id="@+id/eq_author"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/text_field_bg"
@@ -71,7 +71,7 @@
             android:textColor="@android:color/white" />
 
         <EditText
-            android:id="@+id/aq_adder"
+            android:id="@+id/eq_adder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/text_field_bg"
@@ -89,7 +89,7 @@
         android:layout_marginBottom="8dp"
         android:orientation="vertical"
         android:padding="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/aq_add"
+        app:layout_constraintBottom_toTopOf="@+id/eq_save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -104,7 +104,7 @@
             android:textColor="@android:color/white" />
 
         <EditText
-            android:id="@+id/aq_quote"
+            android:id="@+id/eq_quote"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/text_field_bg"
@@ -116,7 +116,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/aq_add"
+        android:id="@+id/eq_save"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -131,7 +131,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/aq_status"
+        android:id="@+id/eq_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

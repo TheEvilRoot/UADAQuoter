@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -20,5 +21,15 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.NewQuoteActivity" android:label="Добавление цитат" />
+        <activity android:name=".activities.EditQuoteActivity" android:label="Редактирование цитат" />
+        <receiver android:name=".widget.RandomQuoteWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_metadata" />
+        </receiver>
     </application>
+
 </manifest>

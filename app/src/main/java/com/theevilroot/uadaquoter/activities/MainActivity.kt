@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -34,12 +36,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var loadingProcess: ProgressBar
     lateinit var rootLayout: ConstraintLayout
     lateinit var searchStatus: TextView
+    lateinit var searchLayout: ConstraintLayout
+    lateinit var searchClose: ImageButton
+    lateinit var searchIgnorCase: IgnoreCaseButton
+    lateinit var searchField: EditText
 
-    lateinit var searchInAnimation: Animation
-    lateinit var searchOutAnimation: Animation
+    lateinit var imm: InputMethodManager
 
-    var quotes: ArrayList<Quote> = ArrayList()
-    var searchMode: Boolean = false
+    var ignoreLocal: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,11 +54,33 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         rootLayout = findViewById(R.id.root_layout)
         searchStatus = findViewById(R.id.search_status)
+        searchLayout = findViewById(R.id.search_layout)
+        searchClose = findViewById(R.id.search_close)
+        searchIgnorCase = findViewById(R.id.search_ignorcase)
+        searchField = findViewById(R.id.search_field)
+        imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         setSupportActionBar(toolbar)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
         supportActionBar!!.title = "Цитаты"
-        searchInAnimation = AnimationUtils.loadAnimation(this, R.anim.abc_slide_in_top)
-        searchOutAnimation = AnimationUtils.loadAnimation(this, R.anim.abc_slide_out_bottom)
+        quotesList.setOnItemLongClickListener { _, _, position, _ ->
+            val intent = Intent(this, EditQuoteActivity::class.java)
+            intent.putExtra("quote", GsonBuilder().create().toJson((quotesList.adapter.getItem(position) as Quote).toJson()))
+            startActivity(intent)
+            true
+        }
+        searchClose.setOnClickListener { closeSearch() }
+        searchIgnorCase.setOnClickListener {
+            searchIgnorCase.turnIgnoreCase()
+            onSearch(searchField.text.toString(), searchIgnorCase)
+        }
+        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnorCase)}))
+        searchField.setOnKeyListener { _, keyCode, event ->
+            if(event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                closeSearch()
+                imm.hideSoftInputFromWindow(searchField.windowToken, 0)
+            }
+            false
+        }
         load()
         loadUserdata()
     }
@@ -79,6 +105,10 @@ class MainActivity : AppCompatActivity() {
         loadingProcess.visibility = View.VISIBLE
     }
 
+    private fun hideLoading() {
+        loadingProcess.visibility = View.GONE
+    }
+
     private fun showList() {
         quotesList.visibility = View.VISIBLE
         loadingProcess.visibility = View.GONE
@@ -87,20 +117,20 @@ class MainActivity : AppCompatActivity() {
     private fun updateUI() {
         runOnUiThread {
             supportActionBar!!.title = getString(R.string.app_name)
-            supportActionBar!!.subtitle = "Загружено ${quotes.size} цитат ${if (quotes.isNotEmpty() && quotes[0].cached) "из кэша" else ""} "
-            quotesList.adapter = QuotesAdapter(this, quotes.toTypedArray())
+            supportActionBar!!.subtitle = "Загружено ${app.quotes.size} цитат ${if (app.quotes.isNotEmpty() &&  app.quotes[0].cached) "из кэша" else ""} "
+            quotesList.adapter = QuotesAdapter(this, app.quotes.toTypedArray())
         }
     }
 
     private fun loadRemote(): Boolean {
         try {
-            val allQuotes = Jsoup.connect("http://52.48.142.75/backend/Quoter.php").data("task", "GET").data("mode", "fromto").data("from", "0").data("to", Integer.MAX_VALUE.toString()).post()
+            val allQuotes = Jsoup.connect("http://52.48.142.75/backend/Quoter.php").data("task", "GET").data("mode", "fromto").data("from", "1").data("to", Integer.MAX_VALUE.toString()).post()
             val allJson = JsonParser().parse(allQuotes.text()).asJsonObject
             if (allJson.get("error").asBoolean)
                 return false
-            quotes.clear()
-            quotes.addAll(allJson.get("quotes").asJsonArray.map { it.asJsonObject }.map {
-                Quote(it.get("id").asString.toInt(), it.get("adder").asString, it.get("author").asString, it.get("quote").asString)
+            app.quotes.clear()
+            app.quotes.addAll(allJson.get("quotes").asJsonArray.map { it.asJsonObject }.map {
+                Quote(it.get("id").asString.toInt(), it.get("adder").asString, it.get("author").asString, it.get("quote").asString, false, if(it["edited_by"].isJsonNull) null else it["edited_by"].asString, if(it["edited_at"].isJsonNull) -1 else it["edited_at"].asLong)
             })
             saveToCache(allJson.get("quotes").asJsonArray)
             return true
@@ -129,40 +159,57 @@ class MainActivity : AppCompatActivity() {
             if (!file.exists())
                 return false
             val json = JsonParser().parse(file.readText()).asJsonObject
-            quotes.clear()
-            quotes.addAll(json.get("quotes").asJsonArray.map { it.asJsonObject }.map {
-                Quote(it.get("id").asString.toInt(), it.get("adder").asString, it.get("author").asString, it.get("quote").asString, true)
+            app.quotes.clear()
+            app.quotes.addAll(json.get("quotes").asJsonArray.map { it.asJsonObject }.map {
+                Quote(it.get("id").asString.toInt(), it.get("adder").asString, it.get("author").asString, it.get("quote").asString, true, it["editedBy"].asString, it["editedAt"].asLong)
             })
+            app.quotes.sortBy { it.id }
             return true
         } catch (e: Exception) {
             e.printStackTrace()
+            runOnUiThread {
+                buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!", {event ->
+                    if(event) {
+                        File(filesDir, "cache.json").delete()
+                        load()
+                        true
+                    }else{
+                        ignoreLocal = true
+                        load()
+                        true
+                    }
+                })
+            }
             return false
         }
     }
 
     private fun load() {
         showLoading()
+        searchStatus.visibility = View.GONE
+        searchStatus.text = "По данному запросу не нашлось цитат. Введите чё-нить другое"
         thread(true) {
             if (loadRemote()) {
                 runOnUiThread { showList() }
                 updateUI()
             } else {
-                if (loadLocal()) {
+                if (!ignoreLocal && loadLocal()) {
                     runOnUiThread { showList() }
                     updateUI()
+                }else {
+                    runOnUiThread {
+                        searchStatus.text = "Похоже отсутствует соединение с интернетом. Проверьте подключение и повторите попытку!"
+                        searchStatus.visibility = View.VISIBLE
+                        hideLoading()
+                    }
                 }
             }
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.toolbar, menu)
-        if (searchMode) {
-            for (i in 0 until menu.size()) {
-                if (menu.getItem(i).itemId != R.id.tb_search)
-                    menu.getItem(i).isVisible = false
-            }
-        }
+        if(!isSearchShowed())
+            menuInflater.inflate(R.menu.toolbar, menu)
         return true
     }
 
@@ -171,72 +218,65 @@ class MainActivity : AppCompatActivity() {
             R.id.tb_reload -> load()
             R.id.tb_search -> {
                 val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                val view = findViewById<View>(R.id.search_overlay)
-                val searchField = view.findViewById<EditText>(R.id.search_overlay_field)
-                val ignoreCaseButton = view.findViewById<IgnoreCaseButton>(R.id.search_overlay_ignore_case)
-                val closeSearchButton = view.findViewById<ImageButton>(R.id.search_overlay_close)
-                searchField.addTextChangedListener(TextWatcherWrapper(onChange = { s, _, _, _ -> onSearch(s, ignoreCaseButton) }))
-                searchField.setOnKeyListener { v, keyCode, event ->
-                    if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                        view.visibility = View.GONE
-                        imm.hideSoftInputFromWindow(view.windowToken, 0)
-                    }
-                    false
-                }
-                ignoreCaseButton.setOnClickListener { ignoreCaseButton.turnIgnoreCase(); onSearch(searchField.text.toString(), ignoreCaseButton) }
-                closeSearchButton.setOnClickListener { view.startAnimation(searchOutAnimation); view.visibility = View.GONE; imm.hideSoftInputFromWindow(view.windowToken, 0); }
-                view.startAnimation(searchInAnimation)
-                view.visibility = View.VISIBLE
-                searchField.requestFocus()
-                imm.showSoftInput(searchField, 0)
+                showSearch()
             }
-
             R.id.tb_add -> {
                 startActivity(Intent(this, NewQuoteActivity::class.java))
             }
-
             android.R.id.home -> {
-                closeSearch(findViewById<View>(R.id.search_overlay))
+                closeSearch()
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onBackPressed() {
-        val view = findViewById<View>(R.id.search_overlay)
-        if (searchMode) {
-            closeSearch(findViewById<View>(R.id.search_overlay))
+        if (isSearchShowed()) {
+            closeSearch()
         } else {
-            if (view.visibility != View.GONE) {
-                view.visibility = View.GONE
-            }
             super.onBackPressed()
         }
     }
 
-    private fun closeSearch(view: View) {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    private fun showSearch() {
+        searchLayout.animate().alphaBy(0F).alpha(1F).setDuration(100).setUpdateListener {
+            if(it.animatedValue == 0F) {
+                searchLayout.visibility = View.VISIBLE
+                invalidateOptionsMenu()
+            }
+            if(it.animatedValue == 1F) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(searchField, 0)
+            }
+        }.start()
+    }
+
+    private fun isSearchShowed(): Boolean =
+            searchLayout.visibility == View.VISIBLE
+
+    private fun closeSearch() {
         with(currentFocus) {
             if (this != null)
-                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                imm.hideSoftInputFromWindow(searchField.windowToken, 0)
         }
-        view.findViewById<EditText>(R.id.search_overlay_field).setText("")
-        view.startAnimation(searchOutAnimation)
-        view.visibility = View.GONE
-        searchStatus.visibility = View.GONE
-        updateUI()
-        supportActionBar!!.setDisplayHomeAsUpEnabled(false)
-        searchMode = false
-        invalidateOptionsMenu()
+        searchLayout.animate().alphaBy(1F).alpha(0F).setDuration(100).setUpdateListener {
+            if(it.animatedValue == 1F) {
+                searchField.setText("")
+                searchStatus.visibility = View.GONE
+                searchLayout.visibility = View.GONE
+                invalidateOptionsMenu()
+                updateUI()
+            }
+        }.start()
     }
 
     private fun onSearch(searchValue: String, ignoreCaseButton: IgnoreCaseButton) {
-        val str = if (ignoreCaseButton.value)
+        val str = if (!ignoreCaseButton.value)
             searchValue.toLowerCase()
         else
             searchValue
         val list: List<Quote> = if (searchValue.isNotBlank()) {
-            quotes.filter {
+            app.quotes.filter {
                 var (id, adder, author, text) = it
                 if (ignoreCaseButton.value) {
                     text = text.toLowerCase()
@@ -249,11 +289,6 @@ class MainActivity : AppCompatActivity() {
             emptyList()
         }
         quotesList.adapter = QuotesAdapter(this, list.toTypedArray())
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        searchMode = true
-        invalidateOptionsMenu()
-        supportActionBar!!.title = "Результаты поиска"
-        supportActionBar!!.subtitle = str
         searchStatus.visibility = if (list.isEmpty()) {
             View.VISIBLE
         } else {

@@ -5,14 +5,13 @@ import android.support.annotation.ColorRes
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -30,7 +29,7 @@ class NewQuoteActivity: AppCompatActivity() {
 
     lateinit var app: App
     lateinit var toolbar: Toolbar
-    lateinit var authorView: EditText
+    lateinit var authorView: AutoCompleteTextView
     lateinit var adderView: EditText
     lateinit var quoteView: EditText
     lateinit var addButton: Button
@@ -41,14 +40,14 @@ class NewQuoteActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.new_quote_activity)
+        setContentView(R.layout.edit_quote_activity)
         app = application as App
         toolbar = findViewById(R.id.toolbar)
-        authorView = findViewById(R.id.aq_author)
-        adderView = findViewById(R.id.aq_adder)
-        quoteView = findViewById(R.id.aq_quote)
-        addButton = findViewById(R.id.aq_add)
-        statusView = findViewById(R.id.aq_status)
+        authorView = findViewById(R.id.eq_author)
+        adderView = findViewById(R.id.eq_adder)
+        quoteView = findViewById(R.id.eq_quote)
+        addButton = findViewById(R.id.eq_save)
+        statusView = findViewById(R.id.eq_status)
         statusInAnimation = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left)
         statusOutAnimation = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right)
         setSupportActionBar(toolbar)
@@ -97,6 +96,9 @@ class NewQuoteActivity: AppCompatActivity() {
             dialog.show()
         }
         adderView.setText(app.adderName)
+        authorView.setAdapter(ArrayAdapter<String>(this, R.layout.text_view, app.quotes.map { it.author }.distinct().toTypedArray()))
+        authorView.setDropDownBackgroundResource(R.drawable.text_field_bg)
+        authorView.dropDownVerticalOffset = 8
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
