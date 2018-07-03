@@ -124,10 +124,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadRemote(): Boolean {
         try {
-            val allQuotes = Jsoup.connect("http://52.48.142.75/backend/Quoter.php").data("task", "GET").data("mode", "fromto").data("from", "1").data("to", Integer.MAX_VALUE.toString()).post()
+            val allQuotes = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
+                    data("task", "GET").
+                    data("mode", "fromto").
+                    data("from", "1").
+                    data("to", Integer.MAX_VALUE.toString()).post()
             val allJson = JsonParser().parse(allQuotes.text()).asJsonObject
-            if (allJson.get("error").asBoolean)
-                return false
             app.quotes.clear()
             app.quotes.addAll(allJson.get("quotes").asJsonArray.map { it.asJsonObject }.map {
                 Quote(it.get("id").asString.toInt(), it.get("adder").asString, it.get("author").asString, it.get("quote").asString, false, if(it["edited_by"].isJsonNull) null else it["edited_by"].asString, if(it["edited_at"].isJsonNull) -1 else it["edited_at"].asLong)

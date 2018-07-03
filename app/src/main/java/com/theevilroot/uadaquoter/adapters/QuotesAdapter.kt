@@ -28,7 +28,7 @@ class QuotesAdapter(context: Context, items: Array<Quote>): ArrayAdapter<Quote>(
             textView.text = item.text
             infoView.text = item.author
             if(item.editedBy != null && item.editedAt != -1L) {
-                editedView.text = "(ред. ${SimpleDateFormat("dd.HH.yyyy").format(Date(item.editedAt))})"
+                editedView.text = "(ред. ${SimpleDateFormat("dd.MM.yyyy").format(Date(item.editedAt))})"
             }else{
                 editedView.text = ""
             }

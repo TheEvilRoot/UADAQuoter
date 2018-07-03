@@ -11,7 +11,7 @@ data class Quote(val id: Int, val adder: String, val author: String, val text: S
         obj.addProperty("author", author)
         obj.addProperty("text", text)
         obj.addProperty("editedBy", editedBy)
-        obj.addProperty("editedAt", editedAt ?: -1)
+        obj.addProperty("editedAt", editedAt)
         return obj
     }
     companion object {

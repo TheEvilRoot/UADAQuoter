@@ -69,7 +69,7 @@ class NewQuoteActivity: AppCompatActivity() {
                     if(code == 6741) {
                         showStatus("Добавление...", android.R.color.holo_green_light, Runnable {
                             try {
-                                val response = Jsoup.connect("http://52.48.142.75/backend/Quoter.php").data("task", "ADD").data("addby", adder).data("author", author).data("quote", quote).data("key", "${CODE_PREFIX}${code}").post()
+                                val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").data("task", "ADD").data("addby", adder).data("author", author).data("quote", quote).data("key", "${CODE_PREFIX}${code}").post()
                                 val json = JsonParser().parse(response.text()).asJsonObject
                                 if(json["error"].asBoolean) {
                                     runOnUiThread { statusView.text = "Ошибка!" }

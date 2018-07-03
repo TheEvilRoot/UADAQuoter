@@ -55,8 +55,7 @@ class EditQuoteActivity : AppCompatActivity() {
         quote = Quote.fromJson(JsonParser().parse(intent.extras.getString("quote")).asJsonObject)
         authorView.setText(quote.author)
         authorView.isEnabled = false
-        adderView.setText(quote.adder)
-        adderView.isEnabled = false
+        adderView.setText(app.adderName)
         quoteView.setText(quote.text)
         saveButton.text = "Сохранить"
         saveButton.setOnClickListener {
@@ -64,18 +63,89 @@ class EditQuoteActivity : AppCompatActivity() {
                 showStatus("Что изменилось?", android.R.color.holo_green_dark, 1000)
                 return@setOnClickListener
             }
-
+            val text = quoteView.text.toString()
+            val adder = adderView.text.toString()
+            if(text.isBlank() || adder.isBlank()) {
+                showStatus("Заполните все поля!", android.R.color.holo_red_light, 1000)
+                return@setOnClickListener
+            }
+            val view = layoutInflater.inflate(R.layout.security_code_dialog_layout, null)
+            val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
+            val pinView = view.findViewById<PinEntryView>(R.id.security_code_field)
+            pinView.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ ->
+                if(str.length == 4) {
+                    val code = str.toIntOrNull() ?: return@TextWatcherWrapper
+                    if(code == 6741) {
+                        showStatus("Сохранение...", android.R.color.holo_green_light, Runnable {
+                            try {
+                                val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
+                                        data("task", "EDIT").
+                                        data("id", quote.id.toString()).
+                                        data("edited_by", adder).
+                                        data("new_text", text).
+                                        data("key", "${PrivateReferences.CODE_PREFIX}$code").post()
+                                val json = JsonParser().parse(response.text()).asJsonObject
+                                if(json["error"].asBoolean) {
+                                    runOnUiThread { statusView.text = "Ошибка!" }
+                                    Thread.sleep(1000)
+                                    return@Runnable
+                                }
+                                runOnUiThread {
+                                    authorView.setText("")
+                                    adderView.setText("")
+                                    quoteView.setText("")
+                                    statusView.text = "Успешно!!!"
+                                }
+                                Thread.sleep(1000)
+                            }catch (e: Exception) {
+                                e.printStackTrace()
+                                runOnUiThread { statusView.text = "Ошибка!" }
+                                Thread.sleep(1000)
+                            }
+                        })
+                        dialog.dismiss()
+                    }
+                }
+            }))
+            dialog.show()
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // menuInflater.inflate(R.menu.add_quote_toolbar, menu)
+        menuInflater.inflate(R.menu.add_quote_toolbar, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             android.R.id.home -> finish()
+            R.id.tb_personal_data -> {
+                val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
+                val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
+                val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
+                val saveButton = view.findViewById<Button>(R.id.personal_data_save)
+                adderNameView.setText(app.adderName)
+                saveButton.setOnClickListener {
+                    val name = adderNameView.text.toString()
+                    if(name == app.adderName) {
+                        dialog.dismiss()
+                        return@setOnClickListener
+                    }
+                    showStatus("Изменение данных", android.R.color.holo_green_light, Runnable {
+                        val file = File(filesDir, "user.json")
+                        if(!file.exists())
+                            file.createNewFile()
+                        val json = JsonObject()
+                        json.addProperty("adderName", name)
+                        file.writeText(GsonBuilder().setPrettyPrinting().create().toJson(json))
+                        app.adderName = name
+                        runOnUiThread { statusView.text = "Изменено!" }
+                        Thread.sleep(1000)
+                    })
+                    dialog.dismiss()
+                }
+                dialog.show()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
