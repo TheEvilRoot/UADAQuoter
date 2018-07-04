@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateUI() {
         runOnUiThread {
             supportActionBar!!.title = getString(R.string.app_name)
-            supportActionBar!!.subtitle = "Загружено ${app.quotes.size} цитат ${if (app.quotes.isNotEmpty() &&  app.quotes[0].cached) "из кэша" else ""} "
+            supportActionBar!!.subtitle = "Загружено ${app.quotes.size} цитат ${if (app.quotes.isNotEmpty() &&  app.quotes[0].cached) "из кэша" else ""}"
             quotesList.adapter = QuotesAdapter(this, app.quotes.toTypedArray())
         }
     }
@@ -127,10 +127,15 @@ class MainActivity : AppCompatActivity() {
             val allQuotes = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
                     data("task", "GET").
                     data("mode", "fromto").
-                    data("from", "1").
+                    data("from", "0").
                     data("to", Integer.MAX_VALUE.toString()).post()
             val allJson = JsonParser().parse(allQuotes.text()).asJsonObject
+            if(allJson.has("error") && allJson["error"].asBoolean) {
+                Log.e("ERROR", "Server error:${allJson["message"]}")
+                return false
+            }
             app.quotes.clear()
+            Log.d("JSON", allJson.toString())
             app.quotes.addAll(allJson.get("quotes").asJsonArray.map { it.asJsonObject }.map {
                 Quote(it.get("id").asString.toInt(), it.get("adder").asString, it.get("author").asString, it.get("quote").asString, false, if(it["edited_by"].isJsonNull) null else it["edited_by"].asString, if(it["edited_at"].isJsonNull) -1 else it["edited_at"].asLong)
             })
@@ -170,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
             runOnUiThread {
-                buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!", {event ->
+                buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!") { event ->
                     if(event) {
                         File(filesDir, "cache.json").delete()
                         load()
@@ -180,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                         load()
                         true
                     }
-                })
+                }
             }
             return false
         }
@@ -189,7 +194,6 @@ class MainActivity : AppCompatActivity() {
     private fun load() {
         showLoading()
         searchStatus.visibility = View.GONE
-        searchStatus.text = "По данному запросу не нашлось цитат. Введите чё-нить другое"
         thread(true) {
             if (loadRemote()) {
                 runOnUiThread { showList() }
@@ -200,13 +204,18 @@ class MainActivity : AppCompatActivity() {
                     updateUI()
                 }else {
                     runOnUiThread {
-                        searchStatus.text = "Похоже отсутствует соединение с интернетом. Проверьте подключение и повторите попытку!"
-                        searchStatus.visibility = View.VISIBLE
+                        showStatus("Похоже отсутствует соединение с интернетом. Проверьте подключение и повторите попытку!")
                         hideLoading()
                     }
                 }
             }
         }
+    }
+
+    private fun showStatus(msg: String) {
+        searchStatus.text = msg
+        searchStatus.visibility = View.VISIBLE
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -291,10 +300,10 @@ class MainActivity : AppCompatActivity() {
             emptyList()
         }
         quotesList.adapter = QuotesAdapter(this, list.toTypedArray())
-        searchStatus.visibility = if (list.isEmpty()) {
-            View.VISIBLE
+        if (list.isEmpty()) {
+            showStatus("По данному запросу не нашлось цитат. Введите чё-нить другое")
         } else {
-            View.GONE
+            searchStatus.visibility = View.GONE
         }
     }
 }
