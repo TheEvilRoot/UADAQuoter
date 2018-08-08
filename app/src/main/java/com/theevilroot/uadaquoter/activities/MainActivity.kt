@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
@@ -12,8 +11,6 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import com.google.gson.GsonBuilder
@@ -38,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var searchStatus: TextView
     lateinit var searchLayout: ConstraintLayout
     lateinit var searchClose: ImageButton
-    lateinit var searchIgnorCase: IgnoreCaseButton
+    lateinit var searchIgnoreCase: IgnoreCaseButton
     lateinit var searchField: EditText
 
     lateinit var imm: InputMethodManager
@@ -56,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         searchStatus = findViewById(R.id.search_status)
         searchLayout = findViewById(R.id.search_layout)
         searchClose = findViewById(R.id.search_close)
-        searchIgnorCase = findViewById(R.id.search_ignorcase)
+        searchIgnoreCase = findViewById(R.id.search_ignorcase)
         searchField = findViewById(R.id.search_field)
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         setSupportActionBar(toolbar)
@@ -69,11 +66,11 @@ class MainActivity : AppCompatActivity() {
             true
         }
         searchClose.setOnClickListener { closeSearch() }
-        searchIgnorCase.setOnClickListener {
-            searchIgnorCase.turnIgnoreCase()
-            onSearch(searchField.text.toString(), searchIgnorCase)
+        searchIgnoreCase.setOnClickListener {
+            searchIgnoreCase.turnIgnoreCase()
+            onSearch(searchField.text.toString(), searchIgnoreCase)
         }
-        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnorCase)}))
+        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase)}))
         searchField.setOnKeyListener { _, keyCode, event ->
             if(event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
                 closeSearch()
@@ -230,7 +227,6 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.tb_reload -> load()
             R.id.tb_search -> {
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 showSearch()
             }
             R.id.tb_add -> {
