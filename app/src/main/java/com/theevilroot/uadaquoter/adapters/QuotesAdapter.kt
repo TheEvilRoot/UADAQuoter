@@ -15,7 +15,7 @@ import java.util.*
 class QuotesAdapter(context: Context, items: Array<Quote>): ArrayAdapter<Quote>(context, R.layout.quote_list_item, items) {
 
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "SimpleDateFormat")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.quote_list_item, null)
         val item = getItem(position) ?: return view

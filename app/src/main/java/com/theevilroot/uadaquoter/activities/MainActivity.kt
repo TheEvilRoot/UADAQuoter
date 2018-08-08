@@ -125,15 +125,17 @@ class MainActivity : AppCompatActivity() {
     private fun loadRemote(): Boolean {
         try {
             val allQuotes = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
+                    ignoreContentType(true).
                     data("task", "GET").
                     data("mode", "fromto").
                     data("from", "0").
                     data("to", Integer.MAX_VALUE.toString()).post()
-            val allJson = JsonParser().parse(allQuotes.text()).asJsonObject
+            var allJson = JsonParser().parse(allQuotes.text()).asJsonObject
             if(allJson.has("error") && allJson["error"].asBoolean) {
                 Log.e("ERROR", "Server error:${allJson["message"]}")
                 return false
             }
+            allJson = allJson["data"].asJsonObject
             app.quotes.clear()
             Log.d("JSON", allJson.toString())
             app.quotes.addAll(allJson.get("quotes").asJsonArray.map { it.asJsonObject }.map {

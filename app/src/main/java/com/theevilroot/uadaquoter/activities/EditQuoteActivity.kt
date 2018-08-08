@@ -79,6 +79,7 @@ class EditQuoteActivity : AppCompatActivity() {
                         showStatus("Сохранение...", android.R.color.holo_green_light, Runnable {
                             try {
                                 val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
+                                        ignoreContentType(true).
                                         data("task", "EDIT").
                                         data("id", quote.id.toString()).
                                         data("edited_by", adder).

@@ -5,7 +5,6 @@ import android.support.annotation.ColorRes
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -69,7 +68,14 @@ class NewQuoteActivity: AppCompatActivity() {
                     if(code == 6741) {
                         showStatus("Добавление...", android.R.color.holo_green_light, Runnable {
                             try {
-                                val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").data("task", "ADD").data("addby", adder).data("author", author).data("quote", quote).data("key", "${CODE_PREFIX}${code}").post()
+                                val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
+                                        ignoreContentType(true).
+                                        data("task", "ADD").
+                                        data("addby", adder).
+                                        data("author", author).
+                                        data("quote", quote).
+                                        data("key", "$CODE_PREFIX$code").
+                                        post()
                                 val json = JsonParser().parse(response.text()).asJsonObject
                                 if(json["error"].asBoolean) {
                                     runOnUiThread { statusView.text = "Ошибка!" }
