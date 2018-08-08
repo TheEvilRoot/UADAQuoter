@@ -26,19 +26,17 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var app: App
+    private lateinit var app: App
+    private lateinit var imm: InputMethodManager
 
-    lateinit var toolbar: Toolbar
-    lateinit var quotesList: ListView
-    lateinit var loadingProcess: ProgressBar
-    lateinit var rootLayout: ConstraintLayout
-    lateinit var searchStatus: TextView
-    lateinit var searchLayout: ConstraintLayout
-    lateinit var searchClose: ImageButton
-    lateinit var searchIgnoreCase: IgnoreCaseButton
-    lateinit var searchField: EditText
-
-    lateinit var imm: InputMethodManager
+    val toolbar by bind<Toolbar>(R.id.toolbar)
+    private val quotesList by bind<ListView>(R.id.quotes_list)
+    private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
+    private val searchStatus by bind<TextView>(R.id.search_status)
+    private val searchLayout by bind<ConstraintLayout>(R.id.search_layout)
+    private val searchClose by bind<ImageButton>(R.id.search_close)
+    private val searchIgnoreCase by bind<IgnoreCaseButton>(R.id.search_ignorcase)
+    private val searchField by bind<EditText>(R.id.search_field)
 
     var ignoreLocal: Boolean = false
 
@@ -46,15 +44,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         app = application as App
-        quotesList = findViewById(R.id.quotes_list)
-        loadingProcess = findViewById(R.id.progressBar)
-        toolbar = findViewById(R.id.toolbar)
-        rootLayout = findViewById(R.id.root_layout)
-        searchStatus = findViewById(R.id.search_status)
-        searchLayout = findViewById(R.id.search_layout)
-        searchClose = findViewById(R.id.search_close)
-        searchIgnoreCase = findViewById(R.id.search_ignorcase)
-        searchField = findViewById(R.id.search_field)
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         setSupportActionBar(toolbar)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)

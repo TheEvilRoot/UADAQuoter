@@ -22,33 +22,27 @@ import org.jsoup.Jsoup
 import kotlin.concurrent.thread
 // Change it to com.theevilroot.uadaquoter.References.CODE_PREFIX
 import com.theevilroot.uadaquoter.PrivateReferences.CODE_PREFIX
+import com.theevilroot.uadaquoter.bind
 import java.io.File
 
 class NewQuoteActivity: AppCompatActivity() {
 
-    lateinit var app: App
-    lateinit var toolbar: Toolbar
-    lateinit var authorView: AutoCompleteTextView
-    lateinit var adderView: EditText
-    lateinit var quoteView: EditText
-    lateinit var addButton: Button
-    lateinit var statusView: TextView
+    private lateinit var app: App
 
-    lateinit var statusInAnimation: Animation
-    lateinit var statusOutAnimation: Animation
+    private val toolbar by bind<Toolbar>(R.id.toolbar)
+    private val authorView by bind<AutoCompleteTextView>(R.id.eq_author)
+    private val adderView by bind<EditText>(R.id.eq_adder)
+    private val quoteView by bind<EditText>(R.id.eq_quote)
+    private val addButton by bind<Button>(R.id.eq_save)
+    private val statusView by bind<TextView>(R.id.eq_status)
+
+    private val statusInAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left) }
+    private val statusOutAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.edit_quote_activity)
         app = application as App
-        toolbar = findViewById(R.id.toolbar)
-        authorView = findViewById(R.id.eq_author)
-        adderView = findViewById(R.id.eq_adder)
-        quoteView = findViewById(R.id.eq_quote)
-        addButton = findViewById(R.id.eq_save)
-        statusView = findViewById(R.id.eq_status)
-        statusInAnimation = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left)
-        statusOutAnimation = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         addButton.setOnClickListener {
@@ -56,8 +50,7 @@ class NewQuoteActivity: AppCompatActivity() {
             val adder = adderView.text.toString()
             val quote = quoteView.text.toString()
             if(author.isBlank() || adder.isBlank() || quote.isBlank()) {
-                showStatus("Заполните все поля!", android.R.color.holo_red_light, 1000)
-                return@setOnClickListener
+                return@setOnClickListener showStatus("Заполните все поля!", android.R.color.holo_red_light, 1000)
             }
             val view = layoutInflater.inflate(R.layout.security_code_dialog_layout, null)
             val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
@@ -79,8 +72,7 @@ class NewQuoteActivity: AppCompatActivity() {
                                 val json = JsonParser().parse(response.text()).asJsonObject
                                 if(json["error"].asBoolean) {
                                     runOnUiThread { statusView.text = "Ошибка!" }
-                                    Thread.sleep(1000)
-                                    return@Runnable
+                                    return@Runnable Thread.sleep(1000)
                                 }
                                 runOnUiThread {
                                     authorView.setText("")
@@ -124,8 +116,7 @@ class NewQuoteActivity: AppCompatActivity() {
                 saveButton.setOnClickListener {
                     val name = adderNameView.text.toString()
                     if(name == app.adderName) {
-                        dialog.dismiss()
-                        return@setOnClickListener
+                        return@setOnClickListener dialog.dismiss()
                     }
                     showStatus("Изменение данных", android.R.color.holo_green_light, Runnable {
                         val file = File(filesDir, "user.json")
@@ -143,7 +134,6 @@ class NewQuoteActivity: AppCompatActivity() {
                 dialog.show()
             }
         }
-
         return super.onOptionsItemSelected(item)
     }
 

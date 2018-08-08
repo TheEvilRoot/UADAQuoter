@@ -35,8 +35,7 @@ public class IgnoreCaseButton extends android.support.v7.widget.AppCompatImageBu
     public void updateDrawable() {
         if(value)
             setColorFilter(Color.argb(255,255,255,255));
-        else
-            setColorFilter(Color.argb(50,255,255,255));
+        else setColorFilter(Color.argb(50,255,255,255));
     }
 
 }

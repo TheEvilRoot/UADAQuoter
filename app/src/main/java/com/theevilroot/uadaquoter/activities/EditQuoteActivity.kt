@@ -1,6 +1,5 @@
 package com.theevilroot.uadaquoter.activities
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.v7.app.AlertDialog
@@ -26,15 +25,16 @@ import kotlin.concurrent.thread
 class EditQuoteActivity : AppCompatActivity() {
 
     lateinit var app: App
-    lateinit var toolbar: Toolbar
-    lateinit var authorView: EditText
-    lateinit var adderView: EditText
-    lateinit var quoteView: EditText
-    lateinit var saveButton: Button
-    lateinit var statusView: TextView
 
-    lateinit var statusInAnimation: Animation
-    lateinit var statusOutAnimation: Animation
+    private val toolbar by bind<Toolbar>(R.id.toolbar)
+    private val authorView by bind<EditText>(R.id.eq_author)
+    private val adderView by bind<EditText>(R.id.eq_adder)
+    private val quoteView by bind<EditText>(R.id.eq_quote)
+    private val saveButton by bind<Button>(R.id.eq_save)
+    private val statusView by bind<TextView>(R.id.eq_status)
+
+    private val statusInAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left) }
+    private val statusOutAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right) }
 
     private lateinit var quote: Quote
 
@@ -42,14 +42,6 @@ class EditQuoteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.edit_quote_activity)
         app = application as App
-        toolbar = findViewById(R.id.toolbar)
-        authorView = findViewById(R.id.eq_author)
-        adderView = findViewById(R.id.eq_adder)
-        quoteView = findViewById(R.id.eq_quote)
-        saveButton = findViewById(R.id.eq_save)
-        statusView = findViewById(R.id.eq_status)
-        statusInAnimation = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left)
-        statusOutAnimation = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         quote = Quote.fromJson(JsonParser().parse(intent.extras.getString("quote")).asJsonObject)
