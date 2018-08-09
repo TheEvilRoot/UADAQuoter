@@ -15,8 +15,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title.Inverse"
-        app:subtitleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle.Inverse">
+        app:subtitleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle.Inverse"
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title.Inverse">
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/search_layout"
@@ -64,10 +64,11 @@
     </android.support.v7.widget.Toolbar>
 
     <ListView
-        android:choiceMode="multipleChoice"
         android:id="@+id/quotes_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:choiceMode="multipleChoice"
+        android:divider="@null"
         android:dividerHeight="0dp"
         android:footerDividersEnabled="false"
         android:headerDividersEnabled="false"
@@ -77,8 +78,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        tools:listitem="@layout/quote_list_item"
-        android:divider="@null"/>
+        tools:listitem="@layout/quote_list_item" />
 
     <ProgressBar
         android:id="@+id/progressBar"
