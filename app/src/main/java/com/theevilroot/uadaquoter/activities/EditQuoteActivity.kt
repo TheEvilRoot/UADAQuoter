@@ -1,5 +1,6 @@
 package com.theevilroot.uadaquoter.activities
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.v7.app.AlertDialog
@@ -18,7 +19,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import me.philio.pinentry.PinEntryView
-import org.jsoup.Jsoup
 import java.io.File
 import kotlin.concurrent.thread
 
@@ -38,6 +38,7 @@ class EditQuoteActivity : AppCompatActivity() {
 
     private lateinit var quote: Quote
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.edit_quote_activity)
@@ -69,32 +70,17 @@ class EditQuoteActivity : AppCompatActivity() {
                     val code = str.toIntOrNull() ?: return@TextWatcherWrapper
                     if(code == 6741) {
                         showStatus("Сохранение...", android.R.color.holo_green_light, Runnable {
-                            try {
-                                val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
-                                        ignoreContentType(true).
-                                        data("task", "EDIT").
-                                        data("id", quote.id.toString()).
-                                        data("edited_by", adder).
-                                        data("new_text", text).
-                                        data("key", "${PrivateReferences.CODE_PREFIX}$code").post()
-                                val json = JsonParser().parse(response.text()).asJsonObject
-                                if(json["error"].asBoolean) {
-                                    runOnUiThread { statusView.text = "Ошибка!" }
-                                    Thread.sleep(1000)
-                                    return@Runnable
-                                }
+                            QuoterAPI.edit(quote.id, adder, text, PrivateReferences.CODE_PREFIX + code, {
                                 runOnUiThread {
                                     authorView.setText("")
                                     adderView.setText("")
                                     quoteView.setText("")
                                     statusView.text = "Успешно!!!"
                                 }
-                                Thread.sleep(1000)
-                            }catch (e: Exception) {
-                                e.printStackTrace()
-                                runOnUiThread { statusView.text = "Ошибка!" }
-                                Thread.sleep(1000)
-                            }
+                            }, {
+                                runOnUiThread { statusView.text = "Ошибка: ${it?.localizedMessage}" }
+                            })
+                            Thread.sleep(1000)
                         })
                         dialog.dismiss()
                     }

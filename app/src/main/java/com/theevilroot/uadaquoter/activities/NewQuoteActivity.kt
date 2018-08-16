@@ -1,5 +1,6 @@
 package com.theevilroot.uadaquoter.activities
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.v7.app.AlertDialog
@@ -13,16 +14,11 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.theevilroot.uadaquoter.App
-import com.theevilroot.uadaquoter.R
-import com.theevilroot.uadaquoter.TextWatcherWrapper
+import com.theevilroot.uadaquoter.*
 import me.philio.pinentry.PinEntryView
-import org.jsoup.Jsoup
 import kotlin.concurrent.thread
 // Change it to com.theevilroot.uadaquoter.References.CODE_PREFIX
 import com.theevilroot.uadaquoter.PrivateReferences.CODE_PREFIX
-import com.theevilroot.uadaquoter.bind
 import java.io.File
 
 class NewQuoteActivity: AppCompatActivity() {
@@ -39,6 +35,7 @@ class NewQuoteActivity: AppCompatActivity() {
     private val statusInAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left) }
     private val statusOutAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right) }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.edit_quote_activity)
@@ -60,32 +57,17 @@ class NewQuoteActivity: AppCompatActivity() {
                     val code = str.toIntOrNull() ?: return@TextWatcherWrapper
                     if(code == 6741) {
                         showStatus("Добавление...", android.R.color.holo_green_light, Runnable {
-                            try {
-                                val response = Jsoup.connect("http://52.48.142.75:8888/backend/quoter").
-                                        ignoreContentType(true).
-                                        data("task", "ADD").
-                                        data("addby", adder).
-                                        data("author", author).
-                                        data("quote", quote).
-                                        data("key", "$CODE_PREFIX$code").
-                                        post()
-                                val json = JsonParser().parse(response.text()).asJsonObject
-                                if(json["error"].asBoolean) {
-                                    runOnUiThread { statusView.text = "Ошибка!" }
-                                    return@Runnable Thread.sleep(1000)
-                                }
+                            QuoterAPI.add(adder, author, quote, "$CODE_PREFIX$code", {
                                 runOnUiThread {
                                     authorView.setText("")
                                     adderView.setText("")
                                     quoteView.setText("")
                                     statusView.text = "Успешно!!!"
                                 }
-                                Thread.sleep(1000)
-                            }catch (e: Exception) {
-                                e.printStackTrace()
-                                runOnUiThread { statusView.text = "Ошибка!" }
-                                Thread.sleep(1000)
-                            }
+                            }, {
+                                runOnUiThread { statusView.text = "Ошибка: ${it?.localizedMessage}" }
+                            })
+                            Thread.sleep(1000)
                         })
                         dialog.dismiss()
                     }
@@ -94,7 +76,7 @@ class NewQuoteActivity: AppCompatActivity() {
             dialog.show()
         }
         adderView.setText(app.adderName)
-        authorView.setAdapter(ArrayAdapter<String>(this, R.layout.text_view, app.quotes.map { it.author }.distinct().toTypedArray()))
+        authorView.setAdapter(ArrayAdapter<String>(this, R.layout.text_view, QuoterAPI.quotes.map { it.author }.distinct().toTypedArray()))
         authorView.setDropDownBackgroundResource(R.drawable.text_field_bg)
         authorView.dropDownVerticalOffset = 8
     }

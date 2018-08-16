@@ -9,9 +9,9 @@ data class Quote(val id: Int, val adder: String, val author: String, val text: S
         obj.addProperty("id", id)
         obj.addProperty("adder", adder)
         obj.addProperty("author", author)
-        obj.addProperty("text", text)
-        obj.addProperty("editedBy", editedBy)
-        obj.addProperty("editedAt", editedAt)
+        obj.addProperty("quote", text)
+        obj.addProperty("edited_by", editedBy)
+        obj.addProperty("edited_at", editedAt)
         return obj
     }
     companion object {
@@ -19,9 +19,9 @@ data class Quote(val id: Int, val adder: String, val author: String, val text: S
                 Quote(obj["id"].asInt,
                         obj["adder"].asString,
                         obj["author"].asString,
-                        obj["text"].asString,
-                        editedBy = if(!obj.has("editedBy") || obj["editedBy"] == null || obj["editedBy"].isJsonNull) null else obj["editedBy"].asString,
-                        editedAt = obj["editedAt"].asLong)
+                        obj["quote"].asString,
+                        editedBy = if(obj["edited_by"].asString == "null") null else obj["edited_by"].asString,
+                        editedAt = obj["edited_at"].asLong)
     }
 
 }
