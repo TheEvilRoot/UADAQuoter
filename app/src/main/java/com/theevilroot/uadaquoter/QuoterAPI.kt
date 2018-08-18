@@ -1,5 +1,6 @@
 package com.theevilroot.uadaquoter
 
+import android.util.Log
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -58,7 +59,7 @@ object QuoterAPI {
         if(json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
-        if("quotes" !in json)
+        if("quotes" !in data)
             return@req onError(APIException("Malformed response data"))
         val quotes = data["quotes"].asJsonArray
         onLoad(quotes.map { it.asJsonObject }.map { Quote.fromJson(it) })
@@ -124,7 +125,7 @@ object QuoterAPI {
             if (!file.exists())
                 return@async onError(null)
             val json = JsonParser().parse(file.readText()).asJsonObject
-            onLoad(json.get("quotes").asJsonArray.map { it.asJsonObject }.map { Quote.fromJson(it) })
+            onLoad(json.get("quotes").asJsonArray.map { it.asJsonObject }.map { Quote.fromJson(it) }.map { it.cached = true ; it})
         } catch (e: Exception) {
             onError(e)
         }
