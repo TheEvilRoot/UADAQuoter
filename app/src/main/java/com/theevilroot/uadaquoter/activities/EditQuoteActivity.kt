@@ -48,7 +48,7 @@ class EditQuoteActivity : AppCompatActivity() {
         quote = Quote.fromJson(JsonParser().parse(intent.extras.getString("quote")).asJsonObject)
         authorView.setText(quote.author)
         authorView.isEnabled = false
-        adderView.setText(app.adderName)
+        adderView.setText(QuoterAPI.getAdderName(this))
         quoteView.setText(quote.text)
         saveButton.text = "Сохранить"
         saveButton.setOnClickListener {
@@ -99,26 +99,20 @@ class EditQuoteActivity : AppCompatActivity() {
         when(item.itemId) {
             android.R.id.home -> finish()
             R.id.tb_personal_data -> {
+                val old = QuoterAPI.getAdderName(this)
                 val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
                 val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
                 val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
                 val saveButton = view.findViewById<Button>(R.id.personal_data_save)
-                adderNameView.setText(app.adderName)
+                adderNameView.setText(old)
                 saveButton.setOnClickListener {
                     val name = adderNameView.text.toString()
-                    if(name == app.adderName) {
+                    if(name == old) {
                         dialog.dismiss()
                         return@setOnClickListener
                     }
-                    showStatus("Изменение данных", android.R.color.holo_green_light, Runnable {
-                        val file = File(filesDir, "user.json")
-                        if(!file.exists())
-                            file.createNewFile()
-                        val json = JsonObject()
-                        json.addProperty("adderName", name)
-                        file.writeText(GsonBuilder().setPrettyPrinting().create().toJson(json))
-                        app.adderName = name
-                        runOnUiThread { statusView.text = "Изменено!" }
+                    showStatus("Изменено", android.R.color.holo_green_light, Runnable {
+                        QuoterAPI.setAdderName(this, name)
                         Thread.sleep(1000)
                     })
                     dialog.dismiss()

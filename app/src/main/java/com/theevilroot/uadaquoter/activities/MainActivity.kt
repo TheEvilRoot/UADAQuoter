@@ -4,7 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.KeyEvent
 import android.view.Menu
@@ -13,11 +16,11 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
+import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
 import java.io.File
 import kotlin.concurrent.thread
 
@@ -26,66 +29,88 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var app: App
     private lateinit var imm: InputMethodManager
+    private lateinit var quotesAdapter: QuotesAdapter
+    private lateinit var searchAdapter: SearchResultAdapter
 
     val toolbar by bind<Toolbar>(R.id.toolbar)
-    private val quotesList by bind<ListView>(R.id.quotes_list)
+    private val quotesView by bind<RecyclerView>(R.id.quotes_view)
     private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
     private val searchStatus by bind<TextView>(R.id.search_status)
     private val searchLayout by bind<ConstraintLayout>(R.id.search_layout)
+    private val searchOverlayLayout by bind<ConstraintLayout>(R.id.search_overlay_layout)
     private val searchClose by bind<ImageButton>(R.id.search_close)
     private val searchIgnoreCase by bind<IgnoreCaseButton>(R.id.search_ignorcase)
     private val searchField by bind<EditText>(R.id.search_field)
+    private val searchQuotesView by bind<RecyclerView>(R.id.search_list_view)
 
     var ignoreLocal: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
+        setSupportActionBar(toolbar)
         app = application as App
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        setSupportActionBar(toolbar)
+        quotesAdapter = QuotesAdapter()
+        searchAdapter = SearchResultAdapter { quote ->
+            quotesView.scrollToPosition(QuoterAPI.quotes.indexOfFirst { it.id == quote.id })
+            closeSearch()
+        }
+        quotesView.layoutManager = LinearLayoutManager(this)
+        searchQuotesView.layoutManager = LinearLayoutManager(this)
+        quotesView.adapter = quotesAdapter
+        searchQuotesView.adapter = searchAdapter
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
         supportActionBar!!.title = "Цитаты"
-        quotesList.setOnItemLongClickListener { _, _, position, _ ->
-            val intent = Intent(this, EditQuoteActivity::class.java)
-            intent.putExtra("quote", GsonBuilder().create().toJson((quotesList.adapter.getItem(position) as Quote).toJson()))
-            startActivity(intent)
-            true
-        }
         searchClose.setOnClickListener { closeSearch() }
         searchIgnoreCase.setOnClickListener {
             searchIgnoreCase.turnIgnoreCase()
-            onSearch(searchField.text.toString(), searchIgnoreCase)
+            onSearch(searchField.text.toString(), searchIgnoreCase.value)
         }
-        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase)}))
-        searchField.setOnKeyListener { _, keyCode, event ->
-            if(event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                closeSearch()
-                imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-            }
-            false
-        }
+        searchOverlayLayout.setOnClickListener { closeSearch() }
+        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase.value)}))
         load()
         loadUserdata()
     }
 
-    private fun loadUserdata() {
-        thread(true) {
-            val file = File(filesDir, "user.json")
-            try {
-                app.adderName = if (file.exists()) {
-                    JsonParser().parse(file.readText()).asJsonObject["adderName"].asString
-                } else {
-                    ""
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+    private fun onSearch(str: String, value: Boolean) {
+        if(str.isNotBlank()) {
+            if (str.startsWith("#")) {
+                searchAdapter.setQuotes(QuoterAPI.quotes.filter { "#${it.id}" == str })
+            } else {
+                searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                    if (value) {
+                        it.text.toLowerCase().contains(str.toLowerCase()) ||
+                                it.adder.toLowerCase().contains(str.toLowerCase()) ||
+                                it.author.toLowerCase().contains(str.toLowerCase())
+                    } else {
+                        it.text.contains(str) ||
+                                it.adder.contains(str) ||
+                                it.author.contains(str)
+                    }
+                })
             }
+        } else {
+            searchAdapter.setQuotes(emptyList())
+        }
+    }
+
+    private fun loadUserdata() {
+        if (QuoterAPI.getAdderName(this).isBlank()) {
+            val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
+            val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
+            val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
+            val saveButton = view.findViewById<Button>(R.id.personal_data_save)
+            saveButton.setOnClickListener {
+                QuoterAPI.setAdderName(this, adderNameView.text.toString())
+                dialog.dismiss()
+            }
+            dialog.show()
         }
     }
 
     private fun showLoading() {
-        quotesList.visibility = View.GONE
+        quotesView.visibility = View.GONE
         loadingProcess.visibility = View.VISIBLE
     }
 
@@ -94,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showList() {
-        quotesList.visibility = View.VISIBLE
+        quotesView.visibility = View.VISIBLE
         loadingProcess.visibility = View.GONE
     }
 
@@ -102,13 +127,13 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             supportActionBar!!.title = getString(R.string.app_name)
             supportActionBar!!.subtitle = "Загружено ${QuoterAPI.quotes.size} цитат ${if (QuoterAPI.quotes.isNotEmpty() &&  QuoterAPI.quotes[0].cached) "из кэша" else ""}"
-            quotesList.adapter = QuotesAdapter(this, QuoterAPI.quotes.toTypedArray())
+            quotesAdapter.notifyDataSetChanged()
         }
     }
 
     private fun loadRemote() {
         QuoterAPI.getTotal({ count ->
-            QuoterAPI.getFromTo(1, count, { quotes ->
+            QuoterAPI.getFromTo(0, count, { quotes ->
                 QuoterAPI.quotes.clear()
                 QuoterAPI.quotes.addAll(quotes)
                 QuoterAPI.saveCache(filesDir, {  }) {  }
@@ -132,6 +157,7 @@ class MainActivity : AppCompatActivity() {
                 updateUI()
             }) {
                 runOnUiThread {
+                    it?.printStackTrace()
                     buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!") { event ->
                         if(event) {
                             File(filesDir, "cache.json").delete()
@@ -146,8 +172,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            showStatus("Похожу на проблему с сервером, не находите? Вот, почитайте, что он мне сказал: ${e?.localizedMessage}")
-            hideLoading()
+            runOnUiThread {
+                showStatus("Похожу на проблему с сервером, не находите? Вот, почитайте, что он мне сказал: ${e?.localizedMessage}")
+                hideLoading()
+            }
         }
     }
 
@@ -197,6 +225,7 @@ class MainActivity : AppCompatActivity() {
         searchLayout.animate().alphaBy(0F).alpha(1F).setDuration(100).setUpdateListener {
             if(it.animatedValue == 0F) {
                 searchLayout.visibility = View.VISIBLE
+                searchOverlayLayout.visibility = View.VISIBLE
                 invalidateOptionsMenu()
             }
             if(it.animatedValue == 1F) {
@@ -219,36 +248,24 @@ class MainActivity : AppCompatActivity() {
                 searchField.setText("")
                 searchStatus.visibility = View.GONE
                 searchLayout.visibility = View.GONE
+                searchOverlayLayout.visibility = View.GONE
                 invalidateOptionsMenu()
-                updateUI()
             }
         }.start()
     }
 
-    private fun onSearch(searchValue: String, ignoreCaseButton: IgnoreCaseButton) {
-        val str = if (!ignoreCaseButton.value)
-            searchValue.toLowerCase()
-        else
-            searchValue
-        val list: List<Quote> = if (searchValue.isNotBlank()) {
-            QuoterAPI.quotes.filter {
-                var (id, adder, author, text) = it
-                if (ignoreCaseButton.value) {
-                    text = text.toLowerCase()
-                    adder = adder.toLowerCase()
-                    author = author.toLowerCase()
-                }
-                text.contains(str) || adder.contains(str) || author.contains(str) || id.toString() == str
-            }
-        } else {
-            emptyList()
-        }
-        quotesList.adapter = QuotesAdapter(this, list.toTypedArray())
-        if (list.isEmpty()) {
-            showStatus("По данному запросу не нашлось цитат. Введите чё-нить другое")
-        } else {
-            searchStatus.visibility = View.GONE
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        try {
+            quotesAdapter.saveStates(outState)
+        }catch (e: Exception) { }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        try {
+            quotesAdapter.restoreStates(savedInstanceState)
+        }catch (e: Exception) { }
     }
 
 }

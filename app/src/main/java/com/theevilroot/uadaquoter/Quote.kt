@@ -10,7 +10,7 @@ data class Quote(val id: Int, val adder: String, val author: String, val text: S
         obj.addProperty("adder", adder)
         obj.addProperty("author", author)
         obj.addProperty("quote", text)
-        obj.addProperty("edited_by", editedBy)
+        obj.addProperty("edited_by", if(editedBy == null) "null" else editedBy)
         obj.addProperty("edited_at", editedAt)
         return obj
     }

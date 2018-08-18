@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    android:id="@+id/quote_main_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
@@ -33,7 +35,6 @@
             android:background="@drawable/primary_dark_bg"
             android:gravity="center_vertical"
             android:text="(ред. 01.01.2000)"
-            android:textAlignment="textStart"
             android:textColor="@android:color/darker_gray" />
 
         <TextView
@@ -54,8 +55,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
-        android:paddingBottom="5dp"
         android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:text="Цитата"
         android:textAlignment="textStart"
         android:textAllCaps="false"

@@ -1,6 +1,8 @@
 package com.theevilroot.uadaquoter
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -14,8 +16,8 @@ object QuoterAPI {
 
     var quotes = ArrayList<Quote>()
 
-    val parser = JsonParser()
-    val response_errors = mapOf(
+    private val parser = JsonParser()
+    private val response_errors = mapOf(
             "KEY_NOT_VALID" to "Invalid key",
             "QUOTE_NOT_FOUND" to "Quote not found",
             "INVALID_ID" to "Invalid quote id",
@@ -24,8 +26,7 @@ object QuoterAPI {
             "TASK_NOT_SET" to "Task not set",
             "INVALID_TASK" to "Invalid task")
 
-    private val backendUrl = "http://52.48.142.75:8888/backend/quoter"
-    private val cacheFilePath = "cache.json"
+    private const val backendUrl = "http://52.48.142.75:8888/backend/quoter"
 
     fun req(url: String, args: Map<String, String>, onLoad: (JsonObject) -> Unit, onError: (Throwable?) -> Unit) = async {
         try {
@@ -60,7 +61,7 @@ object QuoterAPI {
         if(json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
-        if("quotes" !in json)
+        if("quotes" !in data)
             return@req onError(APIException("Malformed response data"))
         val quotes = data["quotes"].asJsonArray
         onLoad(quotes.map { it.asJsonObject }.map { Quote.fromJson(it) })
@@ -126,10 +127,21 @@ object QuoterAPI {
             if (!file.exists())
                 return@async onError(null)
             val json = JsonParser().parse(file.readText()).asJsonObject
-            onLoad(json.get("quotes").asJsonArray.map { it.asJsonObject }.map { Quote.fromJson(it) })
+            onLoad(json.get("quotes").asJsonArray.map { it.asJsonObject }.map { Quote.fromJson(it) }.map { it.cached = true ; it})
         } catch (e: Exception) {
             onError(e)
         }
+    }
+
+    fun getAdderName(context: Context): String {
+        val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
+        return preferences.getString("adderName", "")
+    }
+
+    fun setAdderName(context: Context, name: String): String {
+        val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
+        preferences.edit().putString("adderName", name).apply()
+        return getAdderName(context)
     }
 
     class APIException(msg: String): IOException(msg)
