@@ -1,6 +1,5 @@
 package com.theevilroot.uadaquoter
 
-import android.content.Context
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -14,8 +13,8 @@ object QuoterAPI {
 
     var quotes = ArrayList<Quote>()
 
-    val parser = JsonParser()
-    val response_errors = mapOf(
+    private val parser = JsonParser()
+    private val response_errors = mapOf(
             "KEY_NOT_VALID" to "Invalid key",
             "QUOTE_NOT_FOUND" to "Quote not found",
             "INVALID_ID" to "Invalid quote id",
@@ -24,8 +23,7 @@ object QuoterAPI {
             "TASK_NOT_SET" to "Task not set",
             "INVALID_TASK" to "Invalid task")
 
-    private val backendUrl = "http://52.48.142.75:8888/backend/quoter"
-    private val cacheFilePath = "cache.json"
+    private const val backendUrl = "http://52.48.142.75:8888/backend/quoter"
 
     fun req(url: String, args: Map<String, String>, onLoad: (JsonObject) -> Unit, onError: (Throwable?) -> Unit) = async {
         try {
