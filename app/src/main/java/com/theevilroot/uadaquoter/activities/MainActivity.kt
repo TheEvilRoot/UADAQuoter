@@ -105,18 +105,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadRemote() {
         QuoterAPI.getTotal({ count ->
-            QuoterAPI.getFromTo(1, count, { quotes ->
+            QuoterAPI.getFromTo(0, count, { quotes ->
                 QuoterAPI.quotes.clear()
                 QuoterAPI.quotes.addAll(quotes)
                 QuoterAPI.saveCache(filesDir, {  }) {  }
                 runOnUiThread { showList() }
                 updateUI()
             }, {
-                it?.printStackTrace()
                 onRemoteError(it)
             })
         }) {
-            it?.printStackTrace()
             onRemoteError(it)
         }
     }
