@@ -50,7 +50,6 @@ class SearchResultAdapter(private val onClick: (Quote) -> Unit): RecyclerView.Ad
 
         @SuppressLint("SetTextI18n")
         fun bind(quote: Quote) {
-            itemView.layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT
             idView.text = "#${quote.id}"
             contentView.text = quote.text
             infoView.text = quote.author

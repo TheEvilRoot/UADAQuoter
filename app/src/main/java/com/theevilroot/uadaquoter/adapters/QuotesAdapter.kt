@@ -55,15 +55,12 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
 
         val swipeLayout by bindView<SwipeRevealLayout>(R.id.quote_swipe_layout)
         val mainLayout by bindView<LinearLayout>(R.id.quote_main_layout)
+        val buttonLayout by bindView<LinearLayout>(R.id.quote_main_layout)
 
         private val idView by bindView<TextView>(R.id.quote_id)
         private val infoView by bindView<TextView>(R.id.quote_info)
         private val contentView by bindView<TextView>(R.id.quote_content)
         private val editedView by bindView<TextView>(R.id.quote_edited)
-
-        private val moreAuthorView by bindView<TextView>(R.id.quote_more_author)
-        private val moreAdderView by bindView<TextView>(R.id.quote_more_adder)
-        private val moreEditorView by bindView<TextView>(R.id.quote_more_editor)
 
         private val moreEdit by bindView<View>(R.id.quote_more_edit)
         private val moreShare by bindView<View>(R.id.quote_more_share)
@@ -73,14 +70,11 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
             idView.text = "#${quote.id}"
             contentView.text = quote.text
             infoView.text = quote.author
-            moreAuthorView.text = quote.author
-            moreAdderView.text = quote.adder
+            buttonLayout.layoutParams.height = mainLayout.layoutParams.height
             if(quote.editedBy != null && quote.editedAt != -1L) {
                 editedView.text = "(ред. ${dFormat.format(Date(quote.editedAt))})"
-                moreEditorView.text = quote.editedBy!!
             }else{
                 editedView.text = ""
-                moreEditorView.text = "Не редактировано"
             }
             if(quote.cached) {
                 (moreShare.layoutParams as LinearLayout.LayoutParams).weight = 1f
