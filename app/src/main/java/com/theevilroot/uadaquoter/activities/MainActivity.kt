@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -14,6 +15,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
@@ -93,17 +96,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadUserdata() {
-        thread(true) {
-            val file = File(filesDir, "user.json")
-            try {
-                app.adderName = if (file.exists()) {
-                    JsonParser().parse(file.readText()).asJsonObject["adderName"].asString
-                } else {
-                    ""
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        if (QuoterAPI.getAdderName(this).isBlank()) {
+            val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
+            val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
+            val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
+            val saveButton = view.findViewById<Button>(R.id.personal_data_save)
+            saveButton.setOnClickListener {
+                QuoterAPI.setAdderName(this, adderNameView.text.toString())
+                dialog.dismiss()
             }
+            dialog.show()
         }
     }
 

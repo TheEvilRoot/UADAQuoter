@@ -1,5 +1,7 @@
 package com.theevilroot.uadaquoter
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
@@ -129,6 +131,17 @@ object QuoterAPI {
         } catch (e: Exception) {
             onError(e)
         }
+    }
+
+    fun getAdderName(context: Context): String {
+        val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
+        return preferences.getString("adderName", "")
+    }
+
+    fun setAdderName(context: Context, name: String): String {
+        val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
+        preferences.edit().putString("adderName", name).apply()
+        return getAdderName(context)
     }
 
     class APIException(msg: String): IOException(msg)
