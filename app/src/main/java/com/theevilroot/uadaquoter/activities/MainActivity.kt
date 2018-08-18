@@ -17,6 +17,7 @@ import android.widget.*
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
+import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
 import java.io.File
 import kotlin.concurrent.thread
 
@@ -25,16 +26,19 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var app: App
     private lateinit var imm: InputMethodManager
-    private lateinit var adapter: QuotesAdapter
+    private lateinit var quotesAdapter: QuotesAdapter
+    private lateinit var searchAdapter: SearchResultAdapter
 
     val toolbar by bind<Toolbar>(R.id.toolbar)
     private val quotesView by bind<RecyclerView>(R.id.quotes_view)
     private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
     private val searchStatus by bind<TextView>(R.id.search_status)
     private val searchLayout by bind<ConstraintLayout>(R.id.search_layout)
+    private val searchOverlayLayout by bind<ConstraintLayout>(R.id.search_overlay_layout)
     private val searchClose by bind<ImageButton>(R.id.search_close)
     private val searchIgnoreCase by bind<IgnoreCaseButton>(R.id.search_ignorcase)
     private val searchField by bind<EditText>(R.id.search_field)
+    private val searchQuotesView by bind<RecyclerView>(R.id.search_list_view)
 
     var ignoreLocal: Boolean = false
 
@@ -44,26 +48,48 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         app = application as App
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        adapter = QuotesAdapter()
+        quotesAdapter = QuotesAdapter()
+        searchAdapter = SearchResultAdapter { quote ->
+            quotesView.scrollToPosition(QuoterAPI.quotes.indexOfFirst { it.id == quote.id })
+            closeSearch()
+        }
         quotesView.layoutManager = LinearLayoutManager(this)
-        quotesView.adapter = adapter
+        searchQuotesView.layoutManager = LinearLayoutManager(this)
+        quotesView.adapter = quotesAdapter
+        searchQuotesView.adapter = searchAdapter
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
         supportActionBar!!.title = "Цитаты"
         searchClose.setOnClickListener { closeSearch() }
         searchIgnoreCase.setOnClickListener {
             searchIgnoreCase.turnIgnoreCase()
-            onSearch(searchField.text.toString(), searchIgnoreCase)
+            onSearch(searchField.text.toString(), searchIgnoreCase.value)
         }
-        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase)}))
-        searchField.setOnKeyListener { _, keyCode, event ->
-            if(event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                closeSearch()
-                imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-            }
-            false
-        }
+        searchOverlayLayout.setOnClickListener { closeSearch() }
+        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase.value)}))
         load()
         loadUserdata()
+    }
+
+    private fun onSearch(str: String, value: Boolean) {
+        if(str.isNotBlank()) {
+            if (str.startsWith("#")) {
+                searchAdapter.setQuotes(QuoterAPI.quotes.filter { "#${it.id}" == str })
+            } else {
+                searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                    if (value) {
+                        it.text.toLowerCase().contains(str.toLowerCase()) ||
+                                it.adder.toLowerCase().contains(str.toLowerCase()) ||
+                                it.author.toLowerCase().contains(str.toLowerCase())
+                    } else {
+                        it.text.contains(str) ||
+                                it.adder.contains(str) ||
+                                it.author.contains(str)
+                    }
+                })
+            }
+        } else {
+            searchAdapter.setQuotes(emptyList())
+        }
     }
 
     private fun loadUserdata() {
@@ -99,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             supportActionBar!!.title = getString(R.string.app_name)
             supportActionBar!!.subtitle = "Загружено ${QuoterAPI.quotes.size} цитат ${if (QuoterAPI.quotes.isNotEmpty() &&  QuoterAPI.quotes[0].cached) "из кэша" else ""}"
-            adapter.notifyDataSetChanged()
+            quotesAdapter.notifyDataSetChanged()
         }
     }
 
@@ -173,7 +199,7 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.tb_reload -> load()
             R.id.tb_search -> {
-                // TODO: Refactor: showSearch()
+                showSearch()
             }
             R.id.tb_add -> {
                 startActivity(Intent(this, NewQuoteActivity::class.java))
@@ -197,6 +223,7 @@ class MainActivity : AppCompatActivity() {
         searchLayout.animate().alphaBy(0F).alpha(1F).setDuration(100).setUpdateListener {
             if(it.animatedValue == 0F) {
                 searchLayout.visibility = View.VISIBLE
+                searchOverlayLayout.visibility = View.VISIBLE
                 invalidateOptionsMenu()
             }
             if(it.animatedValue == 1F) {
@@ -219,49 +246,23 @@ class MainActivity : AppCompatActivity() {
                 searchField.setText("")
                 searchStatus.visibility = View.GONE
                 searchLayout.visibility = View.GONE
+                searchOverlayLayout.visibility = View.GONE
                 invalidateOptionsMenu()
-                updateUI()
             }
         }.start()
-    }
-
-    private fun onSearch(searchValue: String, ignoreCaseButton: IgnoreCaseButton) {
-        val str = if (!ignoreCaseButton.value)
-            searchValue.toLowerCase()
-        else
-            searchValue
-        val list: List<Quote> = if (searchValue.isNotBlank()) {
-            QuoterAPI.quotes.filter {
-                var (id, adder, author, text) = it
-                if (ignoreCaseButton.value) {
-                    text = text.toLowerCase()
-                    adder = adder.toLowerCase()
-                    author = author.toLowerCase()
-                }
-                text.contains(str) || adder.contains(str) || author.contains(str) || id.toString() == str
-            }
-        } else {
-            emptyList()
-        }
-       //  quotesView.adapter = QuotesAdapter(this, list.toTypedArray())
-        if (list.isEmpty()) {
-            showStatus("По данному запросу не нашлось цитат. Введите чё-нить другое")
-        } else {
-            searchStatus.visibility = View.GONE
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         try {
-            adapter.saveStates(outState)
+            quotesAdapter.saveStates(outState)
         }catch (e: Exception) { }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         try {
-            adapter.restoreStates(savedInstanceState)
+            quotesAdapter.restoreStates(savedInstanceState)
         }catch (e: Exception) { }
     }
 

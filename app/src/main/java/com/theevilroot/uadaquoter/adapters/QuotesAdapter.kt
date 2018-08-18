@@ -22,7 +22,7 @@ import com.theevilroot.uadaquoter.bindView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
+open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
 
     private val helper = ViewBinderHelper()
 
@@ -48,12 +48,13 @@ class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
     fun restoreStates(state: Bundle) =
             helper.restoreStates(state)
 
-    class QuoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    open class QuoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
         @SuppressLint("SimpleDateFormat")
         private val dFormat = SimpleDateFormat("dd.MM.yyyy")
 
         val swipeLayout by bindView<SwipeRevealLayout>(R.id.quote_swipe_layout)
+        val mainLayout by bindView<LinearLayout>(R.id.quote_main_layout)
 
         private val idView by bindView<TextView>(R.id.quote_id)
         private val infoView by bindView<TextView>(R.id.quote_info)
@@ -68,9 +69,9 @@ class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
         private val moreShare by bindView<View>(R.id.quote_more_share)
 
         @SuppressLint("SetTextI18n")
-        fun bind(quote: Quote) {
+        open fun bind(quote: Quote) {
             idView.text = "#${quote.id}"
-            contentView.text = Html.fromHtml(quote.text)
+            contentView.text = quote.text
             infoView.text = quote.author
             moreAuthorView.text = quote.author
             moreAdderView.text = quote.adder
@@ -89,14 +90,18 @@ class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
                 moreEdit.visibility = View.VISIBLE
             }
             moreEdit.setOnClickListener {
+                if(!swipeLayout.isOpened)
+                    return@setOnClickListener
                 val intent = Intent(itemView.context, EditQuoteActivity::class.java)
                 intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
                 itemView.context.startActivity(intent)
                 swipeLayout.close(true)
             }
             moreShare.setOnClickListener {
+                if(!swipeLayout.isOpened)
+                    return@setOnClickListener
                 val intent = Intent(Intent.ACTION_SEND)
-                intent.putExtra(Intent.EXTRA_TEXT, "${quote.text}\n\n(c) ${quote.author}")
+                intent.putExtra(Intent.EXTRA_TEXT, "${quote.author}:\n${quote.text}\n(c) Цитатник UADAF")
                 intent.type = "text/plain"
                 itemView.context.startActivity(intent)
                 swipeLayout.close(true)
