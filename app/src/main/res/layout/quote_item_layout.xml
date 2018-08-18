@@ -1,66 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chauthai.swipereveallayout.SwipeRevealLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
-    android:orientation="vertical"
-    android:padding="5dp">
+    app:dragEdge="left"
+    app:mode="normal"
+    android:id="@+id/quote_swipe_layout">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:gravity="center"
+                android:drawableStart="@drawable/account"
+                android:id="@+id/quote_more_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Author"
+                android:textAllCaps="false"
+                android:textColor="@color/colorAccent" />
+
+            <TextView
+                android:gravity="center"
+                android:drawableStart="@drawable/plus"
+                android:id="@+id/quote_more_adder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Adder"
+                android:textAllCaps="false"
+                android:textColor="@color/colorAccent" />
+
+            <TextView
+                android:drawableTint="@android:color/white"
+                android:gravity="center"
+                android:drawableStart="@drawable/pencil"
+                android:id="@+id/quote_more_editor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Editor"
+                android:textAllCaps="false"
+                android:textColor="@color/colorAccent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/linearLayout3"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <FrameLayout
+                android:id="@+id/quote_more_edit"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:background="@android:color/holo_blue_bright">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="center"
+                    android:src="@drawable/pencil" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="Edit"
+                    android:textAlignment="center"
+                    android:textAllCaps="true" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/quote_more_share"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:background="@android:color/holo_orange_dark">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="center"
+                    android:src="@drawable/share" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="Share"
+                    android:textAlignment="center"
+                    android:textAllCaps="true" />
+            </FrameLayout>
+        </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/quote_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/primary_dark_bg"
+                android:fontFamily="sans-serif-condensed"
+                android:padding="5dp"
+                android:text="#0"
+                android:textAlignment="textStart"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:typeface="normal" />
+
+            <TextView
+                android:id="@+id/quote_edited"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/primary_dark_bg"
+                android:gravity="center_vertical"
+                android:text="(ред. 01.01.2000)"
+                android:textColor="@android:color/darker_gray" />
+
+            <TextView
+                android:id="@+id/quote_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/primary_dark_bg"
+                android:fontFamily="sans-serif-condensed"
+                android:padding="5dp"
+                android:text="Автор: Root"
+                android:textAlignment="textEnd"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/quote_id"
-            android:layout_width="wrap_content"
+            android:id="@+id/quote_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/primary_dark_bg"
             android:fontFamily="sans-serif-condensed"
-            android:padding="5dp"
-            android:text="#0"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="Цитата"
             android:textAlignment="textStart"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:typeface="normal" />
-
-        <TextView
-            android:id="@+id/quote_edited"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/primary_dark_bg"
-            android:gravity="center_vertical"
-            android:text="(ред. 01.01.2000)"
-            android:textAlignment="textStart"
-            android:textColor="@android:color/darker_gray" />
-
-        <TextView
-            android:id="@+id/quote_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/primary_dark_bg"
-            android:fontFamily="sans-serif-condensed"
-            android:padding="5dp"
-            android:text="Автор: Root"
-            android:textAlignment="textEnd"
-            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/quote_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-condensed"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp"
-        android:text="Цитата"
-        android:textAlignment="textStart"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:typeface="normal" />
-
-</LinearLayout>
+</com.chauthai.swipereveallayout.SwipeRevealLayout>

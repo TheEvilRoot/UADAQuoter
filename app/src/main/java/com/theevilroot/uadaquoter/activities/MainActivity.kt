@@ -248,4 +248,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        try {
+            adapter.saveStates(outState)
+        }catch (e: Exception) { }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        try {
+            adapter.restoreStates(savedInstanceState)
+        }catch (e: Exception) { }
+    }
+
 }

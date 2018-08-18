@@ -35,6 +35,7 @@ dependencies {
     implementation 'me.philio:pinentryview:1.0.6'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.24.0'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1'
 }
 
 kotlin {
