@@ -112,9 +112,11 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread { showList() }
                 updateUI()
             }, {
+                it?.printStackTrace()
                 onRemoteError(it)
             })
         }) {
+            it?.printStackTrace()
             onRemoteError(it)
         }
     }
@@ -129,6 +131,7 @@ class MainActivity : AppCompatActivity() {
                 updateUI()
             }) {
                 runOnUiThread {
+                    it?.printStackTrace()
                     buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!") { event ->
                         if(event) {
                             File(filesDir, "cache.json").delete()
@@ -143,8 +146,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            showStatus("Похожу на проблему с сервером, не находите? Вот, почитайте, что он мне сказал: ${e?.localizedMessage}")
-            hideLoading()
+            runOnUiThread {
+                showStatus("Похожу на проблему с сервером, не находите? Вот, почитайте, что он мне сказал: ${e?.localizedMessage}")
+                hideLoading()
+            }
         }
     }
 

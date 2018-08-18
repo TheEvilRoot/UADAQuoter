@@ -8,6 +8,7 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.chauthai.swipereveallayout.SwipeRevealLayout
@@ -80,6 +81,13 @@ class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
                 editedView.text = ""
                 moreEditorView.text = "Не редактировано"
             }
+            if(quote.cached) {
+                (moreShare.layoutParams as LinearLayout.LayoutParams).weight = 1f
+                moreEdit.visibility = View.GONE
+            } else {
+                (moreShare.layoutParams as LinearLayout.LayoutParams).weight = .5f
+                moreEdit.visibility = View.VISIBLE
+            }
             moreEdit.setOnClickListener {
                 val intent = Intent(itemView.context, EditQuoteActivity::class.java)
                 intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
@@ -91,8 +99,8 @@ class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
                 intent.putExtra(Intent.EXTRA_TEXT, "${quote.text}\n\n(c) ${quote.author}")
                 intent.type = "text/plain"
                 itemView.context.startActivity(intent)
+                swipeLayout.close(true)
             }
-
         }
     }
 
