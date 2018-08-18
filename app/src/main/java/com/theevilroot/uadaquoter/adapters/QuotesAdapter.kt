@@ -1,6 +1,7 @@
 package com.theevilroot.uadaquoter.adapters
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.RecyclerView
 import android.text.Html
@@ -11,9 +12,11 @@ import android.widget.TextView
 import android.widget.Toast
 import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.chauthai.swipereveallayout.ViewBinderHelper
+import com.google.gson.GsonBuilder
 import com.theevilroot.uadaquoter.Quote
 import com.theevilroot.uadaquoter.QuoterAPI
 import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.activities.EditQuoteActivity
 import com.theevilroot.uadaquoter.bindView
 import java.text.SimpleDateFormat
 import java.util.*
@@ -77,14 +80,17 @@ class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
                 editedView.text = ""
                 moreEditorView.text = "Не редактировано"
             }
-
             moreEdit.setOnClickListener {
-                Toast.makeText(itemView.context, "Edit quote #${quote.id}", Toast.LENGTH_SHORT).show()
+                val intent = Intent(itemView.context, EditQuoteActivity::class.java)
+                intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
+                itemView.context.startActivity(intent)
                 swipeLayout.close(true)
             }
             moreShare.setOnClickListener {
-                Toast.makeText(itemView.context, "Share quote #${quote.id}", Toast.LENGTH_SHORT).show()
-                swipeLayout.close(true)
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.putExtra(Intent.EXTRA_TEXT, "${quote.text}\n\n(c) ${quote.author}")
+                intent.type = "text/plain"
+                itemView.context.startActivity(intent)
             }
 
         }
