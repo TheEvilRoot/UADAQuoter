@@ -24,81 +24,35 @@ import java.util.*
 
 open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() {
 
-    private val helper = ViewBinderHelper()
-
-    init {
-        helper.setOpenOnlyOne(true)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder =
-            QuoteViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.quote_item_layout, parent, false))
+            QuoteViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.quote_layout, parent, false))
 
     override fun getItemCount(): Int =
             QuoterAPI.quotes.count()
 
     override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
         holder.itemView.tag = position
-        helper.bind(holder.swipeLayout, QuoterAPI.quotes[position].id.toString())
         holder.bind(QuoterAPI.quotes[position])
     }
-
-    fun saveStates(state: Bundle) =
-            helper.saveStates(state)
-
-    fun restoreStates(state: Bundle) =
-            helper.restoreStates(state)
-
     open class QuoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
         @SuppressLint("SimpleDateFormat")
         private val dFormat = SimpleDateFormat("dd.MM.yyyy")
-
-        val swipeLayout by bindView<SwipeRevealLayout>(R.id.quote_swipe_layout)
-        val mainLayout by bindView<LinearLayout>(R.id.quote_main_layout)
-        val buttonLayout by bindView<LinearLayout>(R.id.quote_main_layout)
 
         private val idView by bindView<TextView>(R.id.quote_id)
         private val infoView by bindView<TextView>(R.id.quote_info)
         private val contentView by bindView<TextView>(R.id.quote_content)
         private val editedView by bindView<TextView>(R.id.quote_edited)
 
-        private val moreEdit by bindView<View>(R.id.quote_more_edit)
-        private val moreShare by bindView<View>(R.id.quote_more_share)
-
         @SuppressLint("SetTextI18n")
         open fun bind(quote: Quote) {
             idView.text = "#${quote.id}"
             contentView.text = quote.text
             infoView.text = quote.author
-            buttonLayout.layoutParams.height = mainLayout.layoutParams.height
             if(quote.editedBy != null && quote.editedAt != -1L) {
                 editedView.text = "(ред. ${dFormat.format(Date(quote.editedAt))})"
             }else{
                 editedView.text = ""
-            }
-            if(quote.cached) {
-                (moreShare.layoutParams as LinearLayout.LayoutParams).weight = 1f
-                moreEdit.visibility = View.GONE
-            } else {
-                (moreShare.layoutParams as LinearLayout.LayoutParams).weight = .5f
-                moreEdit.visibility = View.VISIBLE
-            }
-            moreEdit.setOnClickListener {
-                if(!swipeLayout.isOpened)
-                    return@setOnClickListener
-                val intent = Intent(itemView.context, EditQuoteActivity::class.java)
-                intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
-                itemView.context.startActivity(intent)
-                swipeLayout.close(true)
-            }
-            moreShare.setOnClickListener {
-                if(!swipeLayout.isOpened)
-                    return@setOnClickListener
-                val intent = Intent(Intent.ACTION_SEND)
-                intent.putExtra(Intent.EXTRA_TEXT, "${quote.author}:\n${quote.text}\n(c) Цитатник UADAF")
-                intent.type = "text/plain"
-                itemView.context.startActivity(intent)
-                swipeLayout.close(true)
             }
         }
     }
