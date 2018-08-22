@@ -1,9 +1,11 @@
 package com.theevilroot.uadaquoter.activities
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
+import android.support.v4.content.PermissionChecker
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -43,7 +45,8 @@ class MainActivity : AppCompatActivity() {
     private val searchField by bind<EditText>(R.id.search_field)
     private val searchQuotesView by bind<RecyclerView>(R.id.search_list_view)
 
-    var ignoreLocal: Boolean = false
+    private var ignoreLocal: Boolean = false
+    private var permissionGranted: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,8 +72,28 @@ class MainActivity : AppCompatActivity() {
         }
         searchOverlayLayout.setOnClickListener { closeSearch() }
         searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase.value)}))
-        load()
-        loadUserdata()
+        if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED ||
+                PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
+        } else {
+            load()
+            loadUserdata()
+            permissionGranted = true
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            6741 -> if (grantResults.all { it == PermissionChecker.PERMISSION_GRANTED }) {
+                load()
+                loadUserdata()
+                permissionGranted = true
+            } else {
+                hideLoading()
+                permissionGranted = false
+                showStatus("У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя. Нажмите на кнопку 'Обновить' сверху экрана, если это не поможет, то необходимо дать данные права через настройки устройства!")
+            }
+        }
     }
 
     private fun onSearch(str: String, value: Boolean) {
@@ -199,7 +222,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.tb_reload -> load()
+            R.id.tb_reload -> if (permissionGranted) {
+                load()
+            } else {
+                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
+            }
             R.id.tb_search -> {
                 showSearch()
             }
