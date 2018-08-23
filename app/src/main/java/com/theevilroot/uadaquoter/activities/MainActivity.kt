@@ -1,29 +1,25 @@
 package com.theevilroot.uadaquoter.activities
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
+import android.support.v4.content.PermissionChecker
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
 import java.io.File
-import kotlin.concurrent.thread
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,7 +39,8 @@ class MainActivity : AppCompatActivity() {
     private val searchField by bind<EditText>(R.id.search_field)
     private val searchQuotesView by bind<RecyclerView>(R.id.search_list_view)
 
-    var ignoreLocal: Boolean = false
+    private var ignoreLocal: Boolean = false
+    private var permissionGranted: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +50,8 @@ class MainActivity : AppCompatActivity() {
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         quotesAdapter = QuotesAdapter()
         searchAdapter = SearchResultAdapter { quote ->
-            quotesView.scrollToPosition(QuoterAPI.quotes.indexOfFirst { it.id == quote.id })
+            val id =QuoterAPI.quotes.indexOfFirst { it.id == quote.id }
+            quotesView.scrollToPosition(id)
             closeSearch()
         }
         quotesView.layoutManager = LinearLayoutManager(this)
@@ -69,8 +67,28 @@ class MainActivity : AppCompatActivity() {
         }
         searchOverlayLayout.setOnClickListener { closeSearch() }
         searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase.value)}))
-        load()
-        loadUserdata()
+        if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED ||
+                PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
+        } else {
+            load()
+            loadUserdata()
+            permissionGranted = true
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            6741 -> if (grantResults.all { it == PermissionChecker.PERMISSION_GRANTED }) {
+                load()
+                loadUserdata()
+                permissionGranted = true
+            } else {
+                hideLoading()
+                permissionGranted = false
+                showStatus("У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя. Нажмите на кнопку 'Обновить' сверху экрана, если это не поможет, то необходимо дать данные права через настройки устройства!")
+            }
+        }
     }
 
     private fun onSearch(str: String, value: Boolean) {
@@ -158,8 +176,16 @@ class MainActivity : AppCompatActivity() {
             }) {
                 runOnUiThread {
                     it?.printStackTrace()
-                    buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!") { event ->
-                        if(event) {
+                    buildAlert(this, {
+                        it.text = "Похоже с кешом что-то не так!"
+                    }, {
+                        it.text = "Желаете очистить его?"
+                    }, {
+                        it.text = "Да"
+                    }, {
+                        it.text = "Нет!"
+                    }, {
+                        if(it) {
                             File(filesDir, "cache.json").delete()
                             load()
                             true
@@ -168,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                             load()
                             true
                         }
-                    }
+                    })
                 }
             }
         } else {
@@ -199,7 +225,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.tb_reload -> load()
+            R.id.tb_reload -> if (permissionGranted) {
+                load()
+            } else {
+                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
+            }
             R.id.tb_search -> {
                 showSearch()
             }
@@ -230,7 +260,7 @@ class MainActivity : AppCompatActivity() {
             }
             if(it.animatedValue == 1F) {
                 val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(searchField, 0)
+                imm.showSoftInput(searchField, InputMethodManager.SHOW_FORCED)
             }
         }.start()
     }
@@ -252,20 +282,6 @@ class MainActivity : AppCompatActivity() {
                 invalidateOptionsMenu()
             }
         }.start()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        try {
-            quotesAdapter.saveStates(outState)
-        }catch (e: Exception) { }
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        try {
-            quotesAdapter.restoreStates(savedInstanceState)
-        }catch (e: Exception) { }
     }
 
 }

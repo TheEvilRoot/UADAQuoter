@@ -1,18 +1,12 @@
 package com.theevilroot.uadaquoter.adapters
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.support.v7.widget.RecyclerView
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
-import com.chauthai.swipereveallayout.SwipeRevealLayout
-import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.theevilroot.uadaquoter.Quote
-import com.theevilroot.uadaquoter.QuoterAPI
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.bindView
 import java.text.SimpleDateFormat
