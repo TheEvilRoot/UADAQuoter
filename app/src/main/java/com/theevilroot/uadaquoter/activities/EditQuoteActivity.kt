@@ -14,12 +14,9 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import me.philio.pinentry.PinEntryView
-import java.io.File
 import kotlin.concurrent.thread
 
 class EditQuoteActivity : AppCompatActivity() {

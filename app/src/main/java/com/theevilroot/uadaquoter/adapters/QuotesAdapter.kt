@@ -2,23 +2,14 @@ package com.theevilroot.uadaquoter.adapters
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Bundle
 import android.support.v7.widget.RecyclerView
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import com.chauthai.swipereveallayout.SwipeRevealLayout
-import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.google.gson.GsonBuilder
-import com.theevilroot.uadaquoter.Quote
-import com.theevilroot.uadaquoter.QuoterAPI
-import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.activities.EditQuoteActivity
-import com.theevilroot.uadaquoter.bindView
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -53,6 +44,33 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
                 editedView.text = "(ред. ${dFormat.format(Date(quote.editedAt))})"
             }else{
                 editedView.text = ""
+            }
+            itemView.setOnClickListener {
+                buildAlert(itemView.context,  {
+                    it.text = "Добавил: ${quote.adder}\nАвтор: ${quote.author}${if(quote.editedBy != null) "\nРедактировал:${quote.editedBy!!} ${dFormat.format(quote.editedAt)}" else "" }"
+                    it.textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
+                }, {
+                    it.text = quote.text
+                    it.textSize = it.textSize * 1.05f
+                    it.textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
+                }, {
+                    it.text = "Поделиться"
+                }, {
+                    it.text = "Редактировать"
+                }, {
+                    if (it) {
+                        QuoterAPI.shareQuote(itemView.context, quote)
+                    } else {
+                        val intent = Intent(itemView.context, EditQuoteActivity::class.java)
+                        intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
+                        itemView.context.startActivity(intent)
+                    }
+                    true
+                }, autoShow = false, theme = R.style.AppTheme_Dialog_PopUp).apply {
+                    window.attributes.windowAnimations = R.style.AppTheme_Dialog_PopUp
+                    show()
+                }
+
             }
         }
     }

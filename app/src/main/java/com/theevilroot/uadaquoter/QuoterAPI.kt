@@ -1,8 +1,7 @@
 package com.theevilroot.uadaquoter
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
+import android.content.Intent
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -142,6 +141,13 @@ object QuoterAPI {
         val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
         preferences.edit().putString("adderName", name).apply()
         return getAdderName(context)
+    }
+
+    fun shareQuote(context: Context, quote: Quote) {
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_TEXT, "${quote.author}:\n${quote.text}\n(c) Цитатник UADAF")
+        intent.type = "text/plain"
+        context.startActivity(intent)
     }
 
     class APIException(msg: String): IOException(msg)

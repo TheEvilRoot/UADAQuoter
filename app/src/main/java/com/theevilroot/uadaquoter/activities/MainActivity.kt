@@ -11,21 +11,15 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
 import java.io.File
-import kotlin.concurrent.thread
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,7 +50,8 @@ class MainActivity : AppCompatActivity() {
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         quotesAdapter = QuotesAdapter()
         searchAdapter = SearchResultAdapter { quote ->
-            quotesView.scrollToPosition(QuoterAPI.quotes.indexOfFirst { it.id == quote.id })
+            val id =QuoterAPI.quotes.indexOfFirst { it.id == quote.id }
+            quotesView.scrollToPosition(id)
             closeSearch()
         }
         quotesView.layoutManager = LinearLayoutManager(this)
@@ -181,8 +176,16 @@ class MainActivity : AppCompatActivity() {
             }) {
                 runOnUiThread {
                     it?.printStackTrace()
-                    buildAlert(this, "Похоже с кешом что-то не так!", "Желаете очистить его?", "Да", "Нет!") { event ->
-                        if(event) {
+                    buildAlert(this, {
+                        it.text = "Похоже с кешом что-то не так!"
+                    }, {
+                        it.text = "Желаете очистить его?"
+                    }, {
+                        it.text = "Да"
+                    }, {
+                        it.text = "Нет!"
+                    }, {
+                        if(it) {
                             File(filesDir, "cache.json").delete()
                             load()
                             true
@@ -191,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                             load()
                             true
                         }
-                    }
+                    })
                 }
             }
         } else {
@@ -257,7 +260,7 @@ class MainActivity : AppCompatActivity() {
             }
             if(it.animatedValue == 1F) {
                 val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(searchField, 0)
+                imm.showSoftInput(searchField, InputMethodManager.SHOW_FORCED)
             }
         }.start()
     }

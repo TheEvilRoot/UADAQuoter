@@ -12,14 +12,11 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.theevilroot.uadaquoter.*
 import me.philio.pinentry.PinEntryView
 import kotlin.concurrent.thread
 // Change it to com.theevilroot.uadaquoter.References.CODE_PREFIX
 import com.theevilroot.uadaquoter.PrivateReferences.CODE_PREFIX
-import java.io.File
 
 class NewQuoteActivity: AppCompatActivity() {
 

@@ -1,8 +1,6 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -14,6 +12,13 @@
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
+    </style>
+
+    <style name="AppTheme.Dialog.PopUp" parent="AppTheme.Dialog">
+        <item name="android:titleTextColor">#FFFFFF</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:windowEnterAnimation">@anim/dialog_scaling</item>
+        <item name="android:windowExitAnimation">@anim/dialog_downscaling</item>
     </style>
 
 </resources>
