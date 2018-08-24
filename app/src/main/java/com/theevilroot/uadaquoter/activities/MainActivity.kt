@@ -3,6 +3,7 @@ package com.theevilroot.uadaquoter.activities
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.PermissionChecker
@@ -11,11 +12,11 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import com.google.android.flexbox.JustifyContent
+import com.theevilroot.alertbuilder.AlertBuilder
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
@@ -75,6 +76,7 @@ class MainActivity : AppCompatActivity() {
             loadUserdata()
             permissionGranted = true
         }
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -115,15 +117,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadUserdata() {
         if (QuoterAPI.getAdderName(this).isBlank()) {
-            val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
-            val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
-            val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
-            val saveButton = view.findViewById<Button>(R.id.personal_data_save)
-            saveButton.setOnClickListener {
-                QuoterAPI.setAdderName(this, adderNameView.text.toString())
-                dialog.dismiss()
-            }
-            dialog.show()
+            AlertBuilder(this)
+                    .title { "Ваше имя" }
+                    .editText { editText, _ ->
+                        editText.setBackgroundResource(R.drawable.text_field_bg)
+                        editText.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                        editText.setTextColor(getColor(android.R.color.white))
+                        editText.maxLines = 1
+                        "adderName"
+                    }
+                    .buttonGroup(1) { _, button, alertDescriptor ->
+                        button.setBackgroundResource(android.R.color.transparent)
+                        button.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                        button.setTextColor(getColor(android.R.color.white))
+                        button.text = "Сохранить"
+                        button.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+                        button.textAlignment = View.TEXT_ALIGNMENT_TEXT_END
+                        button.setOnClickListener {
+                            val adderNameField = alertDescriptor.editTexts!!["adderName"]!!.first
+                            QuoterAPI.setAdderName(this, adderNameField.text.toString())
+                            println(adderNameField.text.toString())
+                            alertDescriptor.dialog!!.dismiss()
+                        }
+                        "saveBtn"
+                    }
+                    .autoShow(true)
+                    .build { }
         }
     }
 
@@ -176,30 +195,52 @@ class MainActivity : AppCompatActivity() {
             }) {
                 runOnUiThread {
                     it?.printStackTrace()
-                    buildAlert(this, {
-                        it.text = "Похоже с кешом что-то не так!"
-                    }, {
-                        it.text = "Желаете очистить его?"
-                    }, {
-                        it.text = "Да"
-                    }, {
-                        it.text = "Нет!"
-                    }, {
-                        if(it) {
-                            File(filesDir, "cache.json").delete()
-                            load()
-                            true
-                        }else{
-                            ignoreLocal = true
-                            load()
-                            true
-                        }
-                    })
+                    AlertBuilder(this)
+                            .titleView {
+                                it.textAlignment = View.TEXT_ALIGNMENT_CENTER
+                                it.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                                "Похоже с кешом что-то не так!"
+                            }
+                            .textView { textView, _ ->
+                                textView.text = "Желаете очистить его?"
+                                textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
+                                textView.setTextColor(getColor(android.R.color.white))
+                                textView.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                                "tv1"
+                            }
+                            .buttonGroup(2, {
+                                it.justifyContent = JustifyContent.CENTER
+                            })  { index, button,alertDescriptor ->
+                                button.setTextColor(getColor(android.R.color.white))
+                                button.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                                button.setBackgroundResource(android.R.color.transparent)
+                                button.textSize = 18f
+                                if (index == 0) {
+                                    button.text = "Нет"
+                                    button.setOnClickListener {
+                                        ignoreLocal = true
+                                        load()
+                                        alertDescriptor.dialog!!.dismiss()
+                                    }
+                                     "noBtn"
+                                } else {
+                                    button.text = "Да"
+                                    button.setOnClickListener {
+                                        File(filesDir, "cache.json").delete()
+                                        load()
+                                        alertDescriptor.dialog!!.dismiss()
+                                    }
+                                    "yesBtn"
+                                }
+                            }
+                            .autoShow(true)
+                            .cancelable(false)
+                            .build {  }
                 }
             }
         } else {
             runOnUiThread {
-                showStatus("Похожу на проблему с сервером, не находите? Вот, почитайте, что он мне сказал: ${e?.localizedMessage}")
+                showStatus("Похоже на проблему с подключением, не находите? Вот: ${e?.localizedMessage}")
                 hideLoading()
             }
         }
@@ -234,7 +275,7 @@ class MainActivity : AppCompatActivity() {
                 showSearch()
             }
             R.id.tb_add -> {
-                startActivity(Intent(this, NewQuoteActivity::class.java))
+               startActivity(Intent(this, NewQuoteActivity::class.java))
             }
             android.R.id.home -> {
                 closeSearch()
