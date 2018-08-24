@@ -1,6 +1,7 @@
 package com.theevilroot.uadaquoter.activities
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.v7.app.AlertDialog
@@ -9,12 +10,14 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import com.google.gson.JsonParser
+import com.theevilroot.alertbuilder.AlertBuilder
 import com.theevilroot.uadaquoter.*
 import me.philio.pinentry.PinEntryView
 import kotlin.concurrent.thread
@@ -60,7 +63,7 @@ class EditQuoteActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             val view = layoutInflater.inflate(R.layout.security_code_dialog_layout, null)
-            val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
+            val dialog = AlertDialog.Builder(this, R.style.CustomAlert_Dialog).setView(view).create()
             val pinView = view.findViewById<PinEntryView>(R.id.security_code_field)
             pinView.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ ->
                 if(str.length == 4) {
@@ -96,25 +99,40 @@ class EditQuoteActivity : AppCompatActivity() {
         when(item.itemId) {
             android.R.id.home -> finish()
             R.id.tb_personal_data -> {
-                val old = QuoterAPI.getAdderName(this)
-                val view = layoutInflater.inflate(R.layout.personal_data_layout, null)
-                val dialog = AlertDialog.Builder(this, R.style.AppTheme_Dialog).setView(view).create()
-                val adderNameView = view.findViewById<EditText>(R.id.personal_data_adder_name_field)
-                val saveButton = view.findViewById<Button>(R.id.personal_data_save)
-                adderNameView.setText(old)
-                saveButton.setOnClickListener {
-                    val name = adderNameView.text.toString()
-                    if(name == old) {
-                        dialog.dismiss()
-                        return@setOnClickListener
-                    }
-                    showStatus("Изменено", android.R.color.holo_green_light, Runnable {
-                        QuoterAPI.setAdderName(this, name)
-                        Thread.sleep(1000)
-                    })
-                    dialog.dismiss()
-                }
-                dialog.show()
+                AlertBuilder(this)
+                        .title { "Ваше имя" }
+                        .editText { editText, _ ->
+                            editText.setText(QuoterAPI.getAdderName(this))
+                            editText.setBackgroundResource(R.drawable.text_field_bg)
+                            editText.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                            editText.setTextColor(getColor(android.R.color.white))
+                            editText.maxLines = 1
+                            "adderName"
+                        }
+                        .buttonGroup(1) { _, button, alertDescriptor ->
+                            button.setBackgroundResource(android.R.color.transparent)
+                            button.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
+                            button.setTextColor(getColor(android.R.color.white))
+                            button.text = "Сохранить"
+                            button.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                            button.textAlignment = View.TEXT_ALIGNMENT_TEXT_END
+                            button.setOnClickListener {
+                                val adderNameField = alertDescriptor.editTexts!!["adderName"]!!.first.text.toString()
+                                if(adderNameField == QuoterAPI.getAdderName(this)) {
+                                    alertDescriptor.dialog!!.dismiss()
+                                    return@setOnClickListener
+                                }
+                                showStatus("Изменено", android.R.color.holo_green_light, Runnable {
+                                    QuoterAPI.setAdderName(this, adderNameField)
+                                    Thread.sleep(1000)
+                                })
+                                alertDescriptor.dialog!!.dismiss()
+                            }
+                            "saveBtn"
+                        }
+                        .autoShow(true)
+                        .build { }
+
             }
         }
         return super.onOptionsItemSelected(item)

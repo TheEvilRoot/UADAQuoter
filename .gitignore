@@ -3,6 +3,7 @@ build/
 gradle/
 gradlew.bat
 gradlew
+alertbuilder
 *.properties
 *.iml
 *.pro
