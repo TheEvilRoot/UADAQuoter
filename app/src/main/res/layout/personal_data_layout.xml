@@ -1,33 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
-    android:padding="5dp">
+    android:padding="8dp">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/personal_data_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
         android:padding="2dp"
         android:text="Ваше имя"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/personal_data_adder_name_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/text_field_bg"
+        android:background="@color/colorPrimaryDark"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@android:color/white" />
+        android:padding="8dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/personal_data_label" />
 
-    <Button
-        android:id="@+id/personal_data_save"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/personal_data_cancel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-condensed"
-        android:text="Сохранить"
-        android:textColor="@android:color/white" />
-</LinearLayout>
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/image_button_background"
+        android:src="@drawable/window_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/personal_data_adder_name_field" />
+
+    <ImageButton
+        android:id="@+id/personal_data_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/image_button_background"
+        android:src="@drawable/check"
+        android:tint="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/personal_data_cancel"
+        app:layout_constraintTop_toBottomOf="@+id/personal_data_adder_name_field" />
+</android.support.constraint.ConstraintLayout>

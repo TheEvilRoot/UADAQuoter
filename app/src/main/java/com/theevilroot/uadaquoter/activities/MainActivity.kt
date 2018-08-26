@@ -7,7 +7,6 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.PermissionChecker
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -127,32 +126,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadUserdata() {
         if (QuoterAPI.getAdderName(this).isBlank()) {
-            AlertBuilder(this)
-                    .title { "Ваше имя" }
-                    .editText { editText, _ ->
-                        editText.setBackgroundResource(R.drawable.text_field_bg)
-                        editText.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
-                        editText.setTextColor(getColor(android.R.color.white))
-                        editText.maxLines = 1
-                        "adderName"
-                    }
-                    .buttonGroup(1) { _, button, alertDescriptor ->
-                        button.setBackgroundResource(android.R.color.transparent)
-                        button.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
-                        button.setTextColor(getColor(android.R.color.white))
-                        button.text = "Сохранить"
-                        button.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
-                        button.textAlignment = View.TEXT_ALIGNMENT_TEXT_END
-                        button.setOnClickListener {
-                            val adderNameField = alertDescriptor.editTexts!!["adderName"]!!.first
-                            QuoterAPI.setAdderName(this, adderNameField.text.toString())
-                            println(adderNameField.text.toString())
-                            alertDescriptor.dialog!!.dismiss()
-                        }
-                        "saveBtn"
-                    }
-                    .autoShow(true)
-                    .build { }
+            showAdderNameDialog(this, "", { editText, textView, alertDialog ->
+                if(editText.text.toString().isBlank()) {
+                    textView.text = "Введите что-нибудь, кроме ничего"
+                    return@showAdderNameDialog textView.setTextColor(getColor(android.R.color.holo_red_light))
+                }
+                QuoterAPI.setAdderName(this, editText.text.toString())
+                alertDialog.dismiss()
+            }, false)
         }
     }
 

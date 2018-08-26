@@ -2,7 +2,6 @@ package com.theevilroot.uadaquoter.adapters
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Typeface
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -10,9 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import com.google.android.flexbox.JustifyContent
 import com.google.gson.GsonBuilder
-import com.theevilroot.alertbuilder.AlertBuilder
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.activities.EditQuoteActivity
 import java.text.SimpleDateFormat
