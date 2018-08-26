@@ -12,6 +12,8 @@ import android.widget.TextView
 import com.google.gson.GsonBuilder
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.activities.EditQuoteActivity
+import com.theevilroot.uadaquoter.objects.Quote
+import com.theevilroot.uadaquoter.utils.bindView
 import java.text.SimpleDateFormat
 import java.util.*
 

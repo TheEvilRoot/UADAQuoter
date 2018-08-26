@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.theevilroot.uadaquoter.Quote
+import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.R
-import com.theevilroot.uadaquoter.bindView
+import com.theevilroot.uadaquoter.utils.bindView
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter
+package com.theevilroot.uadaquoter.objects
 
 import com.google.gson.JsonObject
 
@@ -20,7 +20,7 @@ data class Quote(val id: Int, val adder: String, val author: String, val text: S
                         obj["adder"].asString,
                         obj["author"].asString,
                         obj["quote"].asString,
-                        editedBy = if(obj["edited_by"].asString == "null") null else obj["edited_by"].asString,
+                        editedBy = if (obj["edited_by"].asString == "null") null else obj["edited_by"].asString,
                         editedAt = obj["edited_at"].asLong)
     }
 

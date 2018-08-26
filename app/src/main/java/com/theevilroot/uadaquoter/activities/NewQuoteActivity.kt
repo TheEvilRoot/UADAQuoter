@@ -13,8 +13,11 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import com.theevilroot.uadaquoter.*
 import kotlin.concurrent.thread
-// Change it to com.theevilroot.uadaquoter.References.CODE_PREFIX
-import com.theevilroot.uadaquoter.PrivateReferences.CODE_PREFIX
+// Change it to com.theevilroot.uadaquoter.references.References.CODE_PREFIX
+import com.theevilroot.uadaquoter.references.PrivateReferences.CODE_PREFIX
+import com.theevilroot.uadaquoter.utils.bind
+import com.theevilroot.uadaquoter.utils.showAdderNameDialog
+import com.theevilroot.uadaquoter.utils.showPINDialog
 
 class NewQuoteActivity: AppCompatActivity() {
 
@@ -82,11 +85,11 @@ class NewQuoteActivity: AppCompatActivity() {
             android.R.id.home -> finish()
             R.id.tb_personal_data -> {
                 showAdderNameDialog(this, QuoterAPI.getAdderName(this), { editText, textView, alertDialog ->
-                    if(editText.text.toString().isBlank()) {
+                    if (editText.text.toString().isBlank()) {
                         textView.text = "Введите что-нибудь, кроме ничего"
                         return@showAdderNameDialog textView.setTextColor(getColor(android.R.color.holo_red_light))
                     }
-                    if(QuoterAPI.getAdderName(this) == editText.text.toString())
+                    if (QuoterAPI.getAdderName(this) == editText.text.toString())
                         return@showAdderNameDialog alertDialog.dismiss()
                     showStatus("Изменено", android.R.color.holo_green_light, Runnable {
                         QuoterAPI.setAdderName(this, editText.text.toString())

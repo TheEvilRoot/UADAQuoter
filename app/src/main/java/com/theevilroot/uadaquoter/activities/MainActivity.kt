@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.PermissionChecker
@@ -19,6 +20,10 @@ import com.theevilroot.alertbuilder.AlertBuilder
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
+import com.theevilroot.uadaquoter.objects.IgnoreCaseButton
+import com.theevilroot.uadaquoter.objects.TextWatcherWrapper
+import com.theevilroot.uadaquoter.utils.bind
+import com.theevilroot.uadaquoter.utils.showAdderNameDialog
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -50,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         quotesAdapter = QuotesAdapter()
         searchAdapter = SearchResultAdapter { quote ->
-            val id =QuoterAPI.quotes.indexOfFirst { it.id == quote.id }
+            val id = QuoterAPI.quotes.indexOfFirst { it.id == quote.id }
             quotesView.scrollToPosition(id)
             closeSearch()
         }
@@ -66,16 +71,15 @@ class MainActivity : AppCompatActivity() {
             onSearch(searchField.text.toString(), searchIgnoreCase.value)
         }
         searchOverlayLayout.setOnClickListener { closeSearch() }
-        searchField.addTextChangedListener(TextWatcherWrapper(onChange = {str, _,_,_ -> onSearch(str, searchIgnoreCase.value)}))
+        searchField.addTextChangedListener(TextWatcherWrapper(onChange = { str, _, _, _ -> onSearch(str, searchIgnoreCase.value) }))
         if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED ||
                 PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
-        } else {
-            load()
-            loadUserdata()
-            permissionGranted = true
+            if(Build.VERSION.SDK_INT > 23)
+                return requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
         }
-
+        load()
+        loadUserdata()
+        permissionGranted = true
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -127,7 +131,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadUserdata() {
         if (QuoterAPI.getAdderName(this).isBlank()) {
             showAdderNameDialog(this, "", { editText, textView, alertDialog ->
-                if(editText.text.toString().isBlank()) {
+                if (editText.text.toString().isBlank()) {
                     textView.text = "Введите что-нибудь, кроме ничего"
                     return@showAdderNameDialog textView.setTextColor(getColor(android.R.color.holo_red_light))
                 }

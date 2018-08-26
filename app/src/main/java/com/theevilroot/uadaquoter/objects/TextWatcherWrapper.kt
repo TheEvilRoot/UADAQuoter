@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter
+package com.theevilroot.uadaquoter.objects
 
 import android.text.Editable
 import android.text.TextWatcher
