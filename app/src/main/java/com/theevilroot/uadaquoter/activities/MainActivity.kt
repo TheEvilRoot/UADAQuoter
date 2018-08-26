@@ -95,19 +95,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun onSearch(str: String, value: Boolean) {
         if(str.isNotBlank()) {
-            if (str.startsWith("#")) {
-                searchAdapter.setQuotes(QuoterAPI.quotes.filter { "#${it.id}" == str })
-            } else {
-                searchAdapter.setQuotes(QuoterAPI.quotes.filter {
-                    if (value) {
-                        it.text.toLowerCase().contains(str.toLowerCase()) ||
-                                it.adder.toLowerCase().contains(str.toLowerCase()) ||
-                                it.author.toLowerCase().contains(str.toLowerCase())
-                    } else {
-                        it.text.contains(str) ||
-                                it.adder.contains(str) ||
-                                it.author.contains(str)
-                    }
+            when {
+                str.startsWith("#") ->
+                    searchAdapter.setQuotes(QuoterAPI.quotes.filter { "#${it.id}" == str })
+                str.startsWith("+") -> {
+                    val q = str.substring(1).apply { if (!value) toLowerCase()  }
+                    searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                        if (!value)
+                            it.adder.toLowerCase().contains(q)
+                        else it.adder.contains(q)
+                    })
+                }
+                str.startsWith("-") -> {
+                    val q = str.substring(1).apply { if (!value) toLowerCase()  }
+                    searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                        if (!value)
+                            it.author.toLowerCase().contains(q)
+                        else it.author.contains(q)
+                    })
+                }
+                else -> searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                    if (!value)
+                        it.text.toLowerCase().contains(str.toLowerCase())
+                     else it.text.contains(str)
                 })
             }
         } else {
