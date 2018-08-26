@@ -53,9 +53,7 @@ class SearchResultAdapter(private val onClick: (Quote) -> Unit): RecyclerView.Ad
                 editedView.text = ""
             }
             itemView.setOnClickListener {
-                try{
-                    onClick(quote)
-                }catch (e: Exception) {  }
+                try{ onClick(quote) }catch (e: Exception) { }
             }
         }
     }
