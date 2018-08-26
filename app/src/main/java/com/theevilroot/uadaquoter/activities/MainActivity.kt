@@ -77,21 +77,15 @@ class MainActivity : AppCompatActivity() {
             if(Build.VERSION.SDK_INT > 23)
                 return requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
         }
-        load()
-        loadUserdata()
-        permissionGranted = true
+        onPermissionGranted()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             6741 -> if (grantResults.all { it == PermissionChecker.PERMISSION_GRANTED }) {
-                load()
-                loadUserdata()
-                permissionGranted = true
+                onPermissionGranted()
             } else {
-                hideLoading()
-                permissionGranted = false
-                showStatus("У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя. Нажмите на кнопку 'Обновить' сверху экрана, если это не поможет, то необходимо дать данные права через настройки устройства!")
+                onPermissionDenied()
             }
         }
     }
@@ -264,7 +258,17 @@ class MainActivity : AppCompatActivity() {
             R.id.tb_reload -> if (permissionGranted) {
                 load()
             } else {
-                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
+                if (Build.VERSION.SDK_INT > 23) {
+                    requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
+                    return true
+                }
+                val result = arrayOf(PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE))
+                if (result.all { it == PermissionChecker.PERMISSION_GRANTED }) {
+                   onPermissionGranted()
+                } else {
+                    onPermissionDenied()
+                }
             }
             R.id.tb_search -> {
                 showSearch()
@@ -318,6 +322,18 @@ class MainActivity : AppCompatActivity() {
                 invalidateOptionsMenu()
             }
         }.start()
+    }
+
+    private fun onPermissionGranted() {
+        load()
+        loadUserdata()
+        permissionGranted = true
+    }
+
+    private fun onPermissionDenied() {
+        hideLoading()
+        permissionGranted = false
+        showStatus("У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя. Нажмите на кнопку 'Обновить' сверху экрана, если это не поможет, то необходимо дать данные права через настройки устройства!")
     }
 
 }
