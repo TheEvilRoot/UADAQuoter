@@ -110,7 +110,7 @@ class EditQuoteActivity : AppCompatActivity() {
 
     private fun showStatus(msg: String, @ColorRes color: Int, action: Runnable) {
         thread(true) {
-            runOnUiThread { if (statusView.visibility == View.VISIBLE) return@runOnUiThread; statusView.text = msg; statusView.setTextColor(getColor(color)); statusView.visibility = View.VISIBLE; statusView.startAnimation(statusInAnimation) }
+            runOnUiThread { if (statusView.visibility == View.VISIBLE) return@runOnUiThread; statusView.text = msg; statusView.setTextColor(resources.getColor(color)); statusView.visibility = View.VISIBLE; statusView.startAnimation(statusInAnimation) }
             action.run()
             runOnUiThread { if (statusView.visibility == View.GONE) return@runOnUiThread; statusView.clearAnimation(); statusView.startAnimation(statusOutAnimation); statusView.visibility = View.GONE }
         }

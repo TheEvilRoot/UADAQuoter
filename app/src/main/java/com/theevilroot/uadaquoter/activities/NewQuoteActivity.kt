@@ -87,7 +87,7 @@ class NewQuoteActivity: AppCompatActivity() {
                 showAdderNameDialog(this, QuoterAPI.getAdderName(this), { editText, textView, alertDialog ->
                     if (editText.text.toString().isBlank()) {
                         textView.text = "Введите что-нибудь, кроме ничего"
-                        return@showAdderNameDialog textView.setTextColor(getColor(android.R.color.holo_red_light))
+                        return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
                     }
                     if (QuoterAPI.getAdderName(this) == editText.text.toString())
                         return@showAdderNameDialog alertDialog.dismiss()
@@ -104,7 +104,7 @@ class NewQuoteActivity: AppCompatActivity() {
 
     private fun showStatus(msg: String, @ColorRes color: Int, action: Runnable) {
         thread(true) {
-            runOnUiThread {if(statusView.visibility == View.VISIBLE) return@runOnUiThread ; statusView.text = msg ; statusView.setTextColor(getColor(color)) ; statusView.visibility = View.VISIBLE; statusView.startAnimation(statusInAnimation) }
+            runOnUiThread {if(statusView.visibility == View.VISIBLE) return@runOnUiThread ; statusView.text = msg ; statusView.setTextColor(resources.getColor(color)) ; statusView.visibility = View.VISIBLE; statusView.startAnimation(statusInAnimation) }
             action.run()
             runOnUiThread { if(statusView.visibility == View.GONE) return@runOnUiThread ; statusView.clearAnimation() ; statusView.startAnimation(statusOutAnimation) ; statusView.visibility = View.GONE }
         }

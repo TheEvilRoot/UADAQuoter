@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             showAdderNameDialog(this, "", { editText, textView, alertDialog ->
                 if (editText.text.toString().isBlank()) {
                     textView.text = "Введите что-нибудь, кроме ничего"
-                    return@showAdderNameDialog textView.setTextColor(getColor(android.R.color.holo_red_light))
+                    return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
                 }
                 QuoterAPI.setAdderName(this, editText.text.toString())
                 alertDialog.dismiss()
@@ -193,14 +193,14 @@ class MainActivity : AppCompatActivity() {
                             .textView { textView, _ ->
                                 textView.text = "Желаете очистить его?"
                                 textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                                textView.setTextColor(getColor(android.R.color.white))
+                                textView.setTextColor(resources.getColor(android.R.color.white))
                                 textView.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
                                 "tv1"
                             }
                             .buttonGroup(2, {
                                 it.justifyContent = JustifyContent.CENTER
                             })  { index, button,alertDescriptor ->
-                                button.setTextColor(getColor(android.R.color.white))
+                                button.setTextColor(resources.getColor(android.R.color.white))
                                 button.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
                                 button.setBackgroundResource(android.R.color.transparent)
                                 button.textSize = 18f
