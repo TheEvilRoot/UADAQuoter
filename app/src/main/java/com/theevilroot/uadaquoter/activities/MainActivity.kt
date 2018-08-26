@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         searchField.addTextChangedListener(TextWatcherWrapper(onChange = { str, _, _, _ -> onSearch(str, searchIgnoreCase.value) }))
         if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED ||
                 PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
-            if(Build.VERSION.SDK_INT > 23)
+            if(Build.VERSION.SDK_INT >= 23)
                 return requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
         }
         onPermissionGranted()
@@ -258,7 +258,7 @@ class MainActivity : AppCompatActivity() {
             R.id.tb_reload -> if (permissionGranted) {
                 load()
             } else {
-                if (Build.VERSION.SDK_INT > 23) {
+                if (Build.VERSION.SDK_INT >= 23) {
                     requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
                     return true
                 }
