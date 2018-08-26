@@ -16,6 +16,7 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import com.google.gson.JsonParser
 import com.theevilroot.alertbuilder.AlertBuilder
 import com.theevilroot.uadaquoter.*
@@ -71,16 +72,12 @@ class EditQuoteActivity : AppCompatActivity() {
                     if(code == 6741) {
                         showStatus("Сохранение...", android.R.color.holo_green_light, Runnable {
                             QuoterAPI.edit(quote.id, adder, text, PrivateReferences.CODE_PREFIX + code, {
-                                runOnUiThread {
-                                    authorView.setText("")
-                                    adderView.setText("")
-                                    quoteView.setText("")
-                                    statusView.text = "Успешно!!!"
-                                }
+                                runOnUiThread { Toast.makeText(this, "Успешно", Toast.LENGTH_SHORT).show() }
+                                this.finish()
                             }, {
-                                runOnUiThread { statusView.text = "Ошибка: ${it?.localizedMessage}" }
+                                it?.printStackTrace()
+                                runOnUiThread { Toast.makeText(this, "Ошибка", Toast.LENGTH_SHORT).show() }
                             })
-                            Thread.sleep(1000)
                         })
                         dialog.dismiss()
                     }
