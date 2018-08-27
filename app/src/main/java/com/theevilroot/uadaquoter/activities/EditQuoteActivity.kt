@@ -96,7 +96,7 @@ class EditQuoteActivity : AppCompatActivity() {
                 showAdderNameDialog(this, QuoterAPI.getAdderName(this), { editText, textView, alertDialog ->
                     if (editText.text.toString().isBlank()) {
                         textView.text = "Введите что-нибудь, кроме ничего"
-                        return@showAdderNameDialog textView.setTextColor(getColor(android.R.color.holo_red_light))
+                        return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
                     }
                     if (QuoterAPI.getAdderName(this) == editText.text.toString())
                         return@showAdderNameDialog alertDialog.dismiss()
