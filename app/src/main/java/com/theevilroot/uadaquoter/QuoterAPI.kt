@@ -6,6 +6,9 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.theevilroot.uadaquoter.objects.Quote
+import com.theevilroot.uadaquoter.utils.contains
+import com.theevilroot.uadaquoter.utils.getOrDef
 import khttp.get
 import kotlinx.coroutines.experimental.async
 import java.io.File
@@ -47,7 +50,7 @@ object QuoterAPI {
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
         if(json["error"].asBoolean)
-            return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
+            return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
         if(arrayOf("id", "author", "adder", "author", "quote", "edited_by", "edited_at") !in data)
             return@req onError(APIException("Malformed response data"))
@@ -58,7 +61,7 @@ object QuoterAPI {
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
         if(json["error"].asBoolean)
-            return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
+            return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
         if("quotes" !in data)
             return@req onError(APIException("Malformed response data"))
@@ -71,7 +74,7 @@ object QuoterAPI {
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
         if(json["error"].asBoolean)
-            return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
+            return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
         if(arrayOf("id", "author", "adder", "author", "quote", "edited_by", "edited_at") !in data)
             return@req onError(APIException("Malformed response data"))
@@ -82,7 +85,7 @@ object QuoterAPI {
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
         if(json["error"].asBoolean)
-            return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
+            return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
         if("count" !in data)
             return@req onError(APIException("Malformed response data"))
@@ -93,7 +96,7 @@ object QuoterAPI {
         if(arrayOf("error", "message") !in json)
             return@req onError(APIException("Malformed response"))
         if(json["error"].asBoolean)
-            return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
+            return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         onLoad()
     }, onError)
 
@@ -101,7 +104,7 @@ object QuoterAPI {
         if(arrayOf("error", "message") !in json)
             return@req onError(APIException("Malformed response"))
         if(json["error"].asBoolean)
-            return@req onError(APIException("Error: ${response_errors.getOrDefault(json["message"].asString, json["message"].asString)}"))
+            return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         onLoad()
     }, onError)
 
@@ -134,7 +137,7 @@ object QuoterAPI {
 
     fun getAdderName(context: Context): String {
         val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
-        return preferences.getString("adderName", "")
+        return preferences.getString("adderName", "") ?: ""
     }
 
     fun setAdderName(context: Context, name: String): String {

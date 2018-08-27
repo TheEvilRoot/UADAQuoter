@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter;
+package com.theevilroot.uadaquoter.objects;
 
 import android.content.Context;
 import android.graphics.Color;

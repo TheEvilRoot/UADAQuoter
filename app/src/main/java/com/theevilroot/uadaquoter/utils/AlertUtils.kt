@@ -1,32 +1,17 @@
-package com.theevilroot.uadaquoter
+package com.theevilroot.uadaquoter.utils
 
-import android.app.Activity
 import android.content.Context
-import android.support.annotation.IdRes
 import android.support.v7.app.AlertDialog
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
-import com.google.gson.JsonObject
+import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.objects.TextWatcherWrapper
 import me.philio.pinentry.PinEntryView
 
-fun <T: View> Activity.bind(@IdRes id: Int): Lazy<T> =
-        lazy { findViewById<T>(id) }
-fun <T: View> RecyclerView.ViewHolder.bindView(@IdRes id: Int): Lazy<T> =
-        lazy { itemView.findViewById<T>(id) }
-
-operator fun JsonObject.contains(key: String) = has(key)
-operator fun JsonObject.contains(keys: Array<String>): Boolean {
-    for (key in keys)
-        if (key !in this)
-            return false
-    return true
-}
-
-fun showAdderNameDialog(context: Context, defaultValue: String ,onSave: (EditText, TextView, AlertDialog) -> Unit, cancelable: Boolean = true) {
+fun showAdderNameDialog(context: Context, defaultValue: String, onSave: (EditText, TextView, AlertDialog) -> Unit, cancelable: Boolean = true) {
     val view = LayoutInflater.from(context).inflate(R.layout.personal_data_layout, null, false)
     val dialog = AlertDialog.Builder(context).setView(view).setCancelable(cancelable).create()
     with(view) {
