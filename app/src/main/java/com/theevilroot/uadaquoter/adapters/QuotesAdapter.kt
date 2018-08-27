@@ -2,6 +2,7 @@ package com.theevilroot.uadaquoter.adapters
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -51,7 +52,9 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
             }
             itemView.setOnClickListener {
                 val view = LayoutInflater.from(itemView.context).inflate(R.layout.quote_dialog_layout, null, false)
-                val builder = AlertDialog.Builder(itemView.context, R.style.CustomAlert_Dialog).setView(view)
+                val builder = if (Build.VERSION.SDK_INT >= 21)
+                    AlertDialog.Builder(itemView.context, R.style.AppTheme_Dialog_PopUp).setView(view)
+                else AlertDialog.Builder(itemView.context).setView(view)
                 with(view) {
                     val dAdderView = findViewById<TextView>(R.id.quote_dialog_adder)
                     val dAuthorView = findViewById<TextView>(R.id.quote_dialog_author)
