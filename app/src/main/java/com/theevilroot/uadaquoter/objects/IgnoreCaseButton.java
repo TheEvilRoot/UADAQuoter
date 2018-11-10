@@ -2,9 +2,10 @@ package com.theevilroot.uadaquoter.objects;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 
-public class IgnoreCaseButton extends android.support.v7.widget.AppCompatImageButton {
+public class IgnoreCaseButton extends AppCompatImageButton {
 
     public Boolean value;
 

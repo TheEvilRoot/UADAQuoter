@@ -39,7 +39,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/image_button_background"
-        android:src="@drawable/window_close"
+        app:srcCompat="@drawable/window_close"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/personal_data_adder_name_field" />
 
@@ -50,7 +50,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/image_button_background"
-        android:src="@drawable/check"
+        app:srcCompat="@drawable/check"
         android:tint="@android:color/white"
         app:layout_constraintEnd_toStartOf="@+id/personal_data_cancel"
         app:layout_constraintTop_toBottomOf="@+id/personal_data_adder_name_field" />

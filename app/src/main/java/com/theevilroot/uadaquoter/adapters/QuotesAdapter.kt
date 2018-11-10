@@ -50,7 +50,7 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
             }else{
                 editedView.text = ""
             }
-            itemView.setOnClickListener {
+            itemView.setOnClickListener { _ ->
                 val view = LayoutInflater.from(itemView.context).inflate(R.layout.quote_dialog_layout, null, false)
                 val builder = if (Build.VERSION.SDK_INT >= 21)
                     AlertDialog.Builder(itemView.context, R.style.AppTheme_Dialog_PopUp).setView(view)

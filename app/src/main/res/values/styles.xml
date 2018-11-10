@@ -7,7 +7,14 @@
         <item name="android:textColorSecondary">#FFF</item>
     </style>
 
-    <style name="AppTheme.Dialog.PopUp" parent="CustomAlert.Dialog">
+    <style name="AppTheme.Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/background_dialog</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
+        <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
+    </style>
+
+    <style name="AppTheme.Dialog.PopUp" parent="AppTheme.Dialog">
         <item name="android:titleTextColor" tools:targetApi="m">#FFFFFF</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:windowEnterAnimation">@anim/dialog_scaling</item>

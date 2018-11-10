@@ -47,7 +47,7 @@ class EditQuoteActivity : AppCompatActivity() {
         app = application as App
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        quote = Quote.fromJson(JsonParser().parse(intent.extras.getString("quote")).asJsonObject)
+        quote = Quote.fromJson(JsonParser().parse(intent?.extras?.getString("quote")).asJsonObject)
         authorView.setText(quote.author)
         authorView.isEnabled = false
         adderView.setText(QuoterAPI.getAdderName(this))

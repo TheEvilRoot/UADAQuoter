@@ -3,7 +3,6 @@ package com.theevilroot.uadaquoter.activities
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -15,8 +14,6 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import com.google.android.flexbox.JustifyContent
-import com.theevilroot.alertbuilder.AlertBuilder
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
@@ -24,7 +21,6 @@ import com.theevilroot.uadaquoter.objects.IgnoreCaseButton
 import com.theevilroot.uadaquoter.objects.TextWatcherWrapper
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var quotesAdapter: QuotesAdapter
     private lateinit var searchAdapter: SearchResultAdapter
 
-    val toolbar by bind<Toolbar>(R.id.toolbar)
+    private val toolbar by bind<Toolbar>(R.id.toolbar)
     private val quotesView by bind<RecyclerView>(R.id.quotes_view)
     private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
     private val searchStatus by bind<TextView>(R.id.search_status)
@@ -44,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private val searchField by bind<EditText>(R.id.search_field)
     private val searchQuotesView by bind<RecyclerView>(R.id.search_list_view)
 
-    private var ignoreLocal: Boolean = false
+    private var localLoadingError: Boolean = false
     private var permissionGranted: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -174,7 +170,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onRemoteError(e: Throwable?) {
-        if(!ignoreLocal) {
+        if(!localLoadingError) {
             QuoterAPI.loadCache(filesDir, { quotes ->
                 QuoterAPI.quotes.clear()
                 QuoterAPI.quotes.addAll(quotes)
@@ -182,50 +178,8 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread { showList() }
                 updateUI()
             }) {
-                runOnUiThread {
-                    it?.printStackTrace()
-                    AlertBuilder(this)
-                            .titleView {
-                                it.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                                it.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
-                                "Похоже с кешом что-то не так!"
-                            }
-                            .textView { textView, _ ->
-                                textView.text = "Желаете очистить его?"
-                                textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                                textView.setTextColor(resources.getColor(android.R.color.white))
-                                textView.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
-                                "tv1"
-                            }
-                            .buttonGroup(2, {
-                                it.justifyContent = JustifyContent.CENTER
-                            })  { index, button,alertDescriptor ->
-                                button.setTextColor(resources.getColor(android.R.color.white))
-                                button.typeface = Typeface.create("sans-serif-condensed", Typeface.NORMAL)
-                                button.setBackgroundResource(android.R.color.transparent)
-                                button.textSize = 18f
-                                if (index == 0) {
-                                    button.text = "Нет"
-                                    button.setOnClickListener {
-                                        ignoreLocal = true
-                                        load()
-                                        alertDescriptor.dialog!!.dismiss()
-                                    }
-                                     "noBtn"
-                                } else {
-                                    button.text = "Да"
-                                    button.setOnClickListener {
-                                        File(filesDir, "cache.json").delete()
-                                        load()
-                                        alertDescriptor.dialog!!.dismiss()
-                                    }
-                                    "yesBtn"
-                                }
-                            }
-                            .autoShow(true)
-                            .cancelable(false)
-                            .build {  }
-                }
+                it?.printStackTrace()
+                localLoadingError = true
             }
         } else {
             runOnUiThread {
