@@ -17,52 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:subtitleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle.Inverse"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title.Inverse">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/search_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="4dp">
-
-            <ImageButton
-                android:id="@+id/search_close"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:background="@android:color/transparent"
-                app:srcCompat="@drawable/ic_window_close"
-                android:tint="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/search_field"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:drawableStart="@drawable/ic_magnify"
-                android:textColor="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/search_ignorcase"
-                app:layout_constraintStart_toEndOf="@+id/search_close"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <com.theevilroot.uadaquoter.objects.IgnoreCaseButton
-                android:id="@+id/search_ignorcase"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_marginEnd="8dp"
-                android:background="@android:color/transparent"
-                app:srcCompat="@drawable/ic_format_size"
-                android:tint="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.appcompat.widget.Toolbar>
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title.Inverse" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/quotes_view"
@@ -117,7 +72,7 @@
         android:id="@+id/search_overlay_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/backround_layout_search"
+        android:background="@drawable/background_layout_search"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
