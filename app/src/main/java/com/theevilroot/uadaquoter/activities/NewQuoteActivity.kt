@@ -2,15 +2,15 @@ package com.theevilroot.uadaquoter.activities
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.annotation.ColorRes
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.annotation.ColorRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.theevilroot.uadaquoter.*
 import kotlin.concurrent.thread
 // Change it to com.theevilroot.uadaquoter.references.References.CODE_PREFIX
@@ -36,7 +36,7 @@ class NewQuoteActivity: AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.edit_quote_activity)
+        setContentView(R.layout.activity_edit_quote)
         app = application as App
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -52,7 +52,7 @@ class NewQuoteActivity: AppCompatActivity() {
                     val code = str.toIntOrNull() ?: return@showPINDialog
                     if (code == 6741) {
                         showStatus("Добавление...", android.R.color.holo_green_light, Runnable {
-                            QuoterAPI.add(adder, author, quote, "$CODE_PREFIX$code", {
+                            QuoterApi.add(adder, author, quote, "$CODE_PREFIX$code", {
                                 runOnUiThread {
                                     authorView.setText("")
                                     adderView.setText("")
@@ -69,14 +69,14 @@ class NewQuoteActivity: AppCompatActivity() {
                 }
             }
         }
-        adderView.setText(QuoterAPI.getAdderName(this))
-        authorView.setAdapter(ArrayAdapter<String>(this, R.layout.text_view, QuoterAPI.quotes.map { it.author }.distinct().toTypedArray()))
-        authorView.setDropDownBackgroundResource(R.drawable.text_field_bg)
+        adderView.setText(QuoterApi.getAdderName(this))
+        authorView.setAdapter(ArrayAdapter<String>(this, R.layout.item_author, QuoterApi.quotes.asSequence().map { it.author }.distinct().toList().toTypedArray()))
+        authorView.setDropDownBackgroundResource(R.drawable.background_text_edit)
         authorView.dropDownVerticalOffset = 8
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.add_quote_toolbar, menu)
+        menuInflater.inflate(R.menu.menu_add_quote, menu)
         return true
     }
 
@@ -84,15 +84,15 @@ class NewQuoteActivity: AppCompatActivity() {
         when(item.itemId) {
             android.R.id.home -> finish()
             R.id.tb_personal_data -> {
-                showAdderNameDialog(this, QuoterAPI.getAdderName(this), { editText, textView, alertDialog ->
+                showAdderNameDialog(this, QuoterApi.getAdderName(this), { editText, textView, alertDialog ->
                     if (editText.text.toString().isBlank()) {
                         textView.text = "Введите что-нибудь, кроме ничего"
                         return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
                     }
-                    if (QuoterAPI.getAdderName(this) == editText.text.toString())
+                    if (QuoterApi.getAdderName(this) == editText.text.toString())
                         return@showAdderNameDialog alertDialog.dismiss()
                     showStatus("Изменено", android.R.color.holo_green_light, Runnable {
-                        QuoterAPI.setAdderName(this, editText.text.toString())
+                        QuoterApi.setAdderName(this, editText.text.toString())
                         Thread.sleep(1000)
                     })
                     alertDialog.dismiss()

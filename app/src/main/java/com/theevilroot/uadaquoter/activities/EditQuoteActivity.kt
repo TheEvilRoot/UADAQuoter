@@ -2,9 +2,6 @@ package com.theevilroot.uadaquoter.activities
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.annotation.ColorRes
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,6 +11,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.ColorRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.objects.Quote
@@ -43,14 +43,14 @@ class EditQuoteActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.edit_quote_activity)
+        setContentView(R.layout.activity_edit_quote)
         app = application as App
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         quote = Quote.fromJson(JsonParser().parse(intent?.extras?.getString("quote")).asJsonObject)
         authorView.setText(quote.author)
         authorView.isEnabled = false
-        adderView.setText(QuoterAPI.getAdderName(this))
+        adderView.setText(QuoterApi.getAdderName(this))
         quoteView.setText(quote.text)
         saveButton.text = "Сохранить"
         saveButton.setOnClickListener {
@@ -69,7 +69,7 @@ class EditQuoteActivity : AppCompatActivity() {
                     val code = str.toIntOrNull() ?: return@showPINDialog
                     if (code == 6741) {
                         showStatus("Сохранение...", android.R.color.holo_green_light, Runnable {
-                            QuoterAPI.edit(quote.id, adder, text, CODE_PREFIX + code, {
+                            QuoterApi.edit(quote.id, adder, text, CODE_PREFIX + code, {
                                 runOnUiThread { Toast.makeText(this, "Успешно", Toast.LENGTH_SHORT).show() }
                                 this.finish()
                             }, {
@@ -85,7 +85,7 @@ class EditQuoteActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.add_quote_toolbar, menu)
+        menuInflater.inflate(R.menu.menu_add_quote, menu)
         return true
     }
 
@@ -93,14 +93,14 @@ class EditQuoteActivity : AppCompatActivity() {
         when(item.itemId) {
             android.R.id.home -> finish()
             R.id.tb_personal_data -> {
-                showAdderNameDialog(this, QuoterAPI.getAdderName(this), { editText, textView, alertDialog ->
+                showAdderNameDialog(this, QuoterApi.getAdderName(this), { editText, textView, alertDialog ->
                     if (editText.text.toString().isBlank()) {
                         textView.text = "Введите что-нибудь, кроме ничего"
                         return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
                     }
-                    if (QuoterAPI.getAdderName(this) == editText.text.toString())
+                    if (QuoterApi.getAdderName(this) == editText.text.toString())
                         return@showAdderNameDialog alertDialog.dismiss()
-                    QuoterAPI.setAdderName(this, editText.text.toString())
+                    QuoterApi.setAdderName(this, editText.text.toString())
                     alertDialog.dismiss()
                 }, true)
             }

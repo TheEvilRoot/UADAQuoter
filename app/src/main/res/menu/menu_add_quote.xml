@@ -3,6 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/tb_personal_data"
         android:title="Кто вы?"
-        android:icon="@drawable/account"
+        android:icon="@drawable/ic_account"
         app:showAsAction="always" />
 </menu>

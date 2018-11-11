@@ -14,7 +14,7 @@ import kotlinx.coroutines.experimental.async
 import java.io.File
 import java.io.IOException
 
-object QuoterAPI {
+object QuoterApi {
 
     var quotes = ArrayList<Quote>()
 

@@ -4,13 +4,13 @@
     <item android:id="@+id/tb_add"
         android:title="Добавить"
         app:showAsAction="always"
-        android:icon="@drawable/plus" />
+        android:icon="@drawable/ic_plus" />
     <item android:id="@+id/tb_reload"
         android:title="Обновить"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/reload" />
+        android:icon="@drawable/ic_reload" />
     <item android:id="@+id/tb_search"
         android:title="Поиск"
-        android:icon="@drawable/magnify"
+        android:icon="@drawable/ic_magnify"
         app:showAsAction="always"/>
 </menu>

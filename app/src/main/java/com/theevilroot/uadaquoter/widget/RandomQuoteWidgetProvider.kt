@@ -14,7 +14,7 @@ class RandomQuoteWidgetProvider: AppWidgetProvider() {
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        val remoteView = RemoteViews(context.packageName, R.layout.random_quote_widget_layout)
+        val remoteView = RemoteViews(context.packageName, R.layout.widget_random_quote)
         remoteView.setTextViewText(R.id.rqw_quote_id, "#${Random().nextInt()}")
     }
 

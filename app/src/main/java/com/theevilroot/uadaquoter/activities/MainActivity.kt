@@ -5,15 +5,20 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
-import android.support.v4.content.PermissionChecker
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.PermissionChecker
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
@@ -45,13 +50,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
+        setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         app = application as App
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         quotesAdapter = QuotesAdapter()
         searchAdapter = SearchResultAdapter { quote ->
-            val id = QuoterAPI.quotes.indexOfFirst { it.id == quote.id }
+            val id = QuoterApi.quotes.indexOfFirst { it.id == quote.id }
             quotesView.scrollToPosition(id)
             closeSearch()
         }
@@ -59,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         searchQuotesView.layoutManager = LinearLayoutManager(this)
         quotesView.adapter = quotesAdapter
         searchQuotesView.adapter = searchAdapter
-        supportActionBar!!.setHomeAsUpIndicator(R.drawable.window_close)
+        supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_window_close)
         supportActionBar!!.title = "Цитаты"
         searchClose.setOnClickListener { closeSearch() }
         searchIgnoreCase.setOnClickListener {
@@ -90,10 +95,10 @@ class MainActivity : AppCompatActivity() {
         if(str.isNotBlank()) {
             when {
                 str.startsWith("#") ->
-                    searchAdapter.setQuotes(QuoterAPI.quotes.filter { "#${it.id}" == str })
+                    searchAdapter.setQuotes(QuoterApi.quotes.filter { "#${it.id}" == str })
                 str.startsWith("+") -> {
                     val q = str.substring(1).apply { if (!value) toLowerCase()  }
-                    searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                    searchAdapter.setQuotes(QuoterApi.quotes.filter {
                         if (!value)
                             it.adder.toLowerCase().contains(q)
                         else it.adder.contains(q)
@@ -101,13 +106,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 str.startsWith("-") -> {
                     val q = str.substring(1).apply { if (!value) toLowerCase()  }
-                    searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                    searchAdapter.setQuotes(QuoterApi.quotes.filter {
                         if (!value)
                             it.author.toLowerCase().contains(q)
                         else it.author.contains(q)
                     })
                 }
-                else -> searchAdapter.setQuotes(QuoterAPI.quotes.filter {
+                else -> searchAdapter.setQuotes(QuoterApi.quotes.filter {
                     if (!value)
                         it.text.toLowerCase().contains(str.toLowerCase())
                      else it.text.contains(str)
@@ -119,13 +124,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadUserdata() {
-        if (QuoterAPI.getAdderName(this).isBlank()) {
+        if (QuoterApi.getAdderName(this).isBlank()) {
             showAdderNameDialog(this, "", { editText, textView, alertDialog ->
                 if (editText.text.toString().isBlank()) {
                     textView.text = "Введите что-нибудь, кроме ничего"
                     return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
                 }
-                QuoterAPI.setAdderName(this, editText.text.toString())
+                QuoterApi.setAdderName(this, editText.text.toString())
                 alertDialog.dismiss()
             }, false)
         }
@@ -148,17 +153,17 @@ class MainActivity : AppCompatActivity() {
     private fun updateUI() {
         runOnUiThread {
             supportActionBar!!.title = getString(R.string.app_name)
-            supportActionBar!!.subtitle = "Загружено ${QuoterAPI.quotes.size} цитат ${if (QuoterAPI.quotes.isNotEmpty() &&  QuoterAPI.quotes[0].cached) "из кэша" else ""}"
+            supportActionBar!!.subtitle = "Загружено ${QuoterApi.quotes.size} цитат ${if (QuoterApi.quotes.isNotEmpty() &&  QuoterApi.quotes[0].cached) "из кэша" else ""}"
             quotesAdapter.notifyDataSetChanged()
         }
     }
 
     private fun loadRemote() {
-        QuoterAPI.getTotal({ count ->
-            QuoterAPI.getFromTo(0, count, { quotes ->
-                QuoterAPI.quotes.clear()
-                QuoterAPI.quotes.addAll(quotes)
-                QuoterAPI.saveCache(filesDir, {  }) {  }
+        QuoterApi.getTotal({ count ->
+            QuoterApi.getFromTo(0, count, { quotes ->
+                QuoterApi.quotes.clear()
+                QuoterApi.quotes.addAll(quotes)
+                QuoterApi.saveCache(filesDir, {  }) {  }
                 runOnUiThread { showList() }
                 updateUI()
             }, {
@@ -171,10 +176,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun onRemoteError(e: Throwable?) {
         if(!localLoadingError) {
-            QuoterAPI.loadCache(filesDir, { quotes ->
-                QuoterAPI.quotes.clear()
-                QuoterAPI.quotes.addAll(quotes)
-                QuoterAPI.quotes.sortBy { it.id }
+            QuoterApi.loadCache(filesDir, { quotes ->
+                QuoterApi.quotes.clear()
+                QuoterApi.quotes.addAll(quotes)
+                QuoterApi.quotes.sortBy { it.id }
                 runOnUiThread { showList() }
                 updateUI()
             }) {
@@ -203,7 +208,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if(!isSearchShowed())
-            menuInflater.inflate(R.menu.toolbar, menu)
+            menuInflater.inflate(R.menu.menu_toolbar_main, menu)
         return true
     }
 

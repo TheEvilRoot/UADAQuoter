@@ -1,11 +1,11 @@
 package com.theevilroot.uadaquoter.adapters
 
 import android.annotation.SuppressLint
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.utils.bindView

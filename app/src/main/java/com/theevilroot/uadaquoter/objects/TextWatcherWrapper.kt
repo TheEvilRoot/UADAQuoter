@@ -4,6 +4,7 @@ import android.text.Editable
 import android.text.TextWatcher
 
 class TextWatcherWrapper(private val afterChange: (Editable) -> Unit = { _ -> }, private val onChange: (String, Int, Int, Int) -> Unit = { _, _, _, _ -> }, private val beforeChange: (String, Int, Int, Int) -> Unit = { _, _, _, _ -> }): TextWatcher {
+
     override fun afterTextChanged(s: Editable) {
         afterChange(s)
     }

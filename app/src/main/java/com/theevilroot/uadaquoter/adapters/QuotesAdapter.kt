@@ -3,13 +3,13 @@ package com.theevilroot.uadaquoter.adapters
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.GsonBuilder
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.activities.EditQuoteActivity
@@ -24,11 +24,11 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
             QuoteViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.quote_layout, parent, false))
 
     override fun getItemCount(): Int =
-            QuoterAPI.quotes.count()
+            QuoterApi.quotes.count()
 
     override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
         holder.itemView.tag = position
-        holder.bind(QuoterAPI.quotes[position])
+        holder.bind(QuoterApi.quotes[position])
     }
     open class QuoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
@@ -51,7 +51,7 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
                 editedView.text = ""
             }
             itemView.setOnClickListener { _ ->
-                val view = LayoutInflater.from(itemView.context).inflate(R.layout.quote_dialog_layout, null, false)
+                val view = LayoutInflater.from(itemView.context).inflate(R.layout.dialog_quote, null, false)
                 val builder = if (Build.VERSION.SDK_INT >= 21)
                     AlertDialog.Builder(itemView.context, R.style.AppTheme_Dialog_PopUp).setView(view)
                 else AlertDialog.Builder(itemView.context).setView(view)
@@ -72,7 +72,7 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
                         dEditedAtView.text = dFormat.format(quote.editedAt)
                     } else dEditedRoot.visibility = View.GONE
                     dTextView.text = quote.text
-                    dShareBtn.setOnClickListener { QuoterAPI.shareQuote(itemView.context, quote) }
+                    dShareBtn.setOnClickListener { QuoterApi.shareQuote(itemView.context, quote) }
                     dEditBtn.setOnClickListener {
                         val intent = Intent(itemView.context, EditQuoteActivity::class.java)
                         intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))

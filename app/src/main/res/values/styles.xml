@@ -17,7 +17,7 @@
     <style name="AppTheme.Dialog.PopUp" parent="AppTheme.Dialog">
         <item name="android:titleTextColor" tools:targetApi="m">#FFFFFF</item>
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:windowEnterAnimation">@anim/dialog_scaling</item>
-        <item name="android:windowExitAnimation">@anim/dialog_downscaling</item>
+        <item name="android:windowEnterAnimation">@anim/anim_dialog_upscale</item>
+        <item name="android:windowExitAnimation">@anim/anim_dialog_downscale</item>
     </style>
 </resources>
