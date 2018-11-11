@@ -9,10 +9,24 @@ import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.contains
 import com.theevilroot.uadaquoter.utils.getOrDef
-import khttp.get
-import kotlinx.coroutines.experimental.async
+import io.ktor.client.HttpClient
+import io.ktor.client.call.call
+import io.ktor.client.call.receive
+import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.get
+import io.ktor.client.request.url
+import io.ktor.client.response.readBytes
+import io.ktor.client.response.readText
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
+import io.ktor.http.encodeURLPath
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.io.File
 import java.io.IOException
+import java.net.URL
 
 object QuoterApi {
 
@@ -30,16 +44,24 @@ object QuoterApi {
 
     private const val backendUrl = "http://52.48.142.75:8888/backend/quoter"
 
-    fun req(url: String, args: Map<String, String>, onLoad: (JsonObject) -> Unit, onError: (Throwable?) -> Unit) = async {
+    fun req(reqUrl: String, args: Map<String, String>, onLoad: (JsonObject) -> Unit, onError: (Throwable?) -> Unit) =  GlobalScope.async {
         try {
-            val res = get(url, data = args)
-            when(res.statusCode) {
-                200 -> onLoad(parser.parse(res.text).asJsonObject)
+            val client = HttpClient()
+            val res = client.call(URL(reqUrl)) {
+                method = HttpMethod.Post
+                body = FormDataContent(Parameters.build {
+                    args.forEach { t, u ->
+                        append(t, u)
+                    }
+                })
+            }
+            when(res.response.status.value) {
+                200 -> onLoad(parser.parse(res.response.readText()).asJsonObject)
                 404 -> onError(APIException("Backend does not exists"))
                 500 -> onError(APIException("Server is busy"))
                 403 -> onError(APIException("Server permission error"))
                 418 -> onError(APIException("Server is a teapot"))
-                else -> onError(APIException("Server error: ${res.statusCode}"))
+                else -> onError(APIException("Server error: ${res.response.status.value}"))
             }
         }catch (e: Throwable) {
             onError(e)
@@ -108,7 +130,7 @@ object QuoterApi {
         onLoad()
     }, onError)
 
-    fun saveCache(filesDir: File, onSuccess: () -> Unit, onError: (Throwable?) -> Unit) = async {
+    fun saveCache(filesDir: File, onSuccess: () -> Unit, onError: (Throwable?) -> Unit) = GlobalScope.async {
         try {
             val file = File(filesDir, "cache.json")
             if (!file.exists())
@@ -123,7 +145,7 @@ object QuoterApi {
             onError(e)
         }
     }
-    fun loadCache(filesDir: File, onLoad: (List<Quote>) -> Unit, onError: (Throwable?) -> Unit) = async {
+    fun loadCache(filesDir: File, onLoad: (List<Quote>) -> Unit, onError: (Throwable?) -> Unit) = GlobalScope.async {
         try {
             val file = File(filesDir, "cache.json")
             if (!file.exists())

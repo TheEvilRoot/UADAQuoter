@@ -1,8 +1,8 @@
 package com.theevilroot.uadaquoter.utils
 
 import android.app.Activity
-import android.support.annotation.IdRes
 import android.view.View
+import androidx.annotation.IdRes
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
 

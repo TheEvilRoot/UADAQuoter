@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -16,9 +17,9 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.PermissionChecker
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
-import com.theevilroot.uadaquoter.adapters.SearchResultAdapter
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
 
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imm: InputMethodManager
     private lateinit var quotesAdapter: QuotesAdapter
 
-    private val toolbar by bind<Toolbar>(R.id.toolbar)
+    private val appbar by bind<BottomAppBar>(R.id.app_bar)
     private val quotesView by bind<RecyclerView>(R.id.quotes_view)
     private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
     private val searchStatus by bind<TextView>(R.id.search_status)
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(appbar)
         app = application as App
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         quotesAdapter = QuotesAdapter()
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onRemoteError(e: Throwable?) {
+        Log.e("onRemoteError", "", e)
         if(!localLoadingError) {
             QuoterApi.loadCache(filesDir, { quotes ->
                 QuoterApi.quotes.clear()
