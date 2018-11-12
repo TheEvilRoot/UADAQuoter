@@ -18,6 +18,7 @@ import androidx.core.content.PermissionChecker
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.utils.bind
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val appbar by bind<BottomAppBar>(R.id.app_bar)
     private val quotesView by bind<RecyclerView>(R.id.quotes_view)
     private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
-    private val searchStatus by bind<TextView>(R.id.search_status)
+    private val appbarButton by bind<FloatingActionButton>(R.id.app_bar_button)
 
     private var localLoadingError: Boolean = false
     private var permissionGranted: Boolean = false
@@ -132,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             runOnUiThread {
-                showStatus("Похоже на проблему с подключением, не находите? Вот: ${e?.localizedMessage}")
+                // showStatus("Похоже на проблему с подключением, не находите? Вот: ${e?.localizedMessage}")
                 hideLoading()
             }
         }
@@ -140,14 +141,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun load() {
         showLoading()
-        searchStatus.visibility = View.GONE
         loadRemote()
-    }
-
-    private fun showStatus(msg: String) {
-        searchStatus.text = msg
-        searchStatus.visibility = View.VISIBLE
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -188,7 +182,7 @@ class MainActivity : AppCompatActivity() {
     private fun onPermissionDenied() {
         hideLoading()
         permissionGranted = false
-        showStatus("У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя. Нажмите на кнопку 'Обновить' сверху экрана, если это не поможет, то необходимо дать данные права через настройки устройства!")
+        // showStatus("У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя. Нажмите на кнопку 'Обновить' сверху экрана, если это не поможет, то необходимо дать данные права через настройки устройства!")
     }
 
 }
