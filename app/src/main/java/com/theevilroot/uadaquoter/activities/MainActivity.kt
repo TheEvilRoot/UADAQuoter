@@ -15,14 +15,18 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.PermissionChecker
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.FlexboxLayout
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
+import daio.io.dresscode.matchDressCode
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,13 +43,14 @@ class MainActivity : AppCompatActivity() {
     private var permissionGranted: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        matchDressCode()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(appbar)
         app = application as App
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         quotesAdapter = QuotesAdapter()
-        quotesView.layoutManager = LinearLayoutManager(this)
+        quotesView.layoutManager = GridLayoutManager(this, 1)
         quotesView.adapter = quotesAdapter
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_window_close)
         supportActionBar!!.title = "Цитаты"

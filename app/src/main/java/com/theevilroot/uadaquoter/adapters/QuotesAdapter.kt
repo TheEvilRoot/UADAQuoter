@@ -6,6 +6,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -38,48 +39,33 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
         private val idView by bindView<TextView>(R.id.quote_id)
         private val infoView by bindView<TextView>(R.id.quote_info)
         private val contentView by bindView<TextView>(R.id.quote_content)
-        private val editedView by bindView<TextView>(R.id.quote_edited)
+        private val adderRootView by bindView<View>(R.id.quote_adder_root)
+        private val adderView by bindView<TextView>(R.id.quote_adder)
+        private val editInfoRootView by bindView<View>(R.id.quote_edit_info_root)
+        private val editInfoView by bindView<TextView>(R.id.quote_edit_info)
+        private val actionRootView by bindView<View>(R.id.quote_action_root)
+        private val editAction by bindView<Button>(R.id.quote_action_edit)
+        private val shareAction by bindView<Button>(R.id.quote_action_share)
 
         @SuppressLint("SetTextI18n")
         open fun bind(quote: Quote) {
             idView.text = "#${quote.id}"
             contentView.text = quote.text
             infoView.text = quote.author
+            adderView.text = quote.adder
             if(quote.editedBy != null && quote.editedAt != -1L) {
-                editedView.text = "(ред. ${dFormat.format(Date(quote.editedAt))})"
+                editInfoView.text = "${dFormat.format(Date(quote.editedAt))} ${quote.editedBy}"
+                editInfoRootView.visibility = View.VISIBLE
             }else{
-                editedView.text = ""
+                editInfoRootView.visibility = View.GONE
             }
-            itemView.setOnClickListener { _ ->
-                val view = LayoutInflater.from(itemView.context).inflate(R.layout.dialog_quote, null, false)
-                val builder = if (Build.VERSION.SDK_INT >= 21)
-                    AlertDialog.Builder(itemView.context, R.style.AppTheme_Dialog_PopUp).setView(view)
-                else AlertDialog.Builder(itemView.context).setView(view)
-                with(view) {
-                    val dAdderView = findViewById<TextView>(R.id.quote_dialog_adder)
-                    val dAuthorView = findViewById<TextView>(R.id.quote_dialog_author)
-                    val dEditorView = findViewById<TextView>(R.id.quote_dialog_editor)
-                    val dEditedAtView = findViewById<TextView>(R.id.quote_dialog_edited_at)
-                    val dTextView = findViewById<TextView>(R.id.quote_dialog_text)
-                    val dShareBtn = findViewById<ImageButton>(R.id.quote_dialog_share)
-                    val dEditBtn = findViewById<ImageButton>(R.id.quote_dialog_edit)
-                    val dEditedRoot = findViewById<View>(R.id.quote_dialog_edited_root)
-
-                    dAdderView.text = quote.adder
-                    dAuthorView.text = quote.author
-                    if (quote.editedBy != null) {
-                        dEditorView.text = quote.editedBy!!
-                        dEditedAtView.text = dFormat.format(quote.editedAt)
-                    } else dEditedRoot.visibility = View.GONE
-                    dTextView.text = quote.text
-                    dShareBtn.setOnClickListener { QuoterApi.shareQuote(itemView.context, quote) }
-                    dEditBtn.setOnClickListener {
-                        val intent = Intent(itemView.context, EditQuoteActivity::class.java)
-                        intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
-                        itemView.context.startActivity(intent)
-                    }
-                }
-                builder.create().apply { window?.attributes?.windowAnimations = R.style.AppTheme_Dialog_PopUp }.show()
+            editAction.setOnClickListener {
+                val intent = Intent(itemView.context, EditQuoteActivity::class.java)
+                intent.putExtra("quote", GsonBuilder().create().toJson(quote.toJson()))
+                itemView.context.startActivity(intent)
+            }
+            shareAction.setOnClickListener {
+                QuoterApi.shareQuote(itemView.context, quote)
             }
         }
     }

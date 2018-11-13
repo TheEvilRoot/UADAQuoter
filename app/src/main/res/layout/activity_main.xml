@@ -5,13 +5,12 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorPrimaryDark" >
+    android:background="?attr/colorPrimary" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/root_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark">
+        android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/quotes_view"
@@ -27,7 +26,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
             tools:listitem="@layout/quote_layout" />
 
         <ProgressBar
@@ -52,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:backgroundTint="@color/colorPrimaryDark"
+        app:backgroundTint="?attr/colorPrimaryDark"
         app:fabAlignmentMode="end"
         app:hideOnScroll="true">
 
@@ -66,8 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/app_name"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-                android:textColor="#fff" />
+                android:textColor="?android:attr/textColor" />
         </RelativeLayout>
 
     </com.google.android.material.bottomappbar.BottomAppBar>
@@ -76,11 +73,12 @@
         android:id="@+id/app_bar_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:backgroundTint="@color/colorPrimaryDark"
+        app:backgroundTint="?attr/colorPrimaryDark"
         app:backgroundTintMode="src_in"
         app:fabSize="normal"
         app:layout_anchor="@id/app_bar"
         app:srcCompat="@drawable/ic_magnify"
+        android:tint="?android:attr/textColor"
         app:useCompatPadding="false" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

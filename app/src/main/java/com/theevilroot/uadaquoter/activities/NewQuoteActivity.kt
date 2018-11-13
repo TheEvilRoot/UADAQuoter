@@ -18,6 +18,7 @@ import com.theevilroot.uadaquoter.references.PrivateReferences.CODE_PREFIX
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
 import com.theevilroot.uadaquoter.utils.showPINDialog
+import daio.io.dresscode.matchDressCode
 
 class NewQuoteActivity: AppCompatActivity() {
 
@@ -35,6 +36,7 @@ class NewQuoteActivity: AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
+        matchDressCode()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_quote)
         app = application as App

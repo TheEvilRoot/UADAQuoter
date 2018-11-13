@@ -1,23 +1,62 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- Main themes (Activity) -->
+
+    <style name="AppTheme.UADAF" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColorSecondary">#FFF</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textColorSecondary">@color/textColorSecondary</item>
     </style>
 
-    <style name="AppTheme.Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="AppTheme.UADAFDark" parent="AppTheme.UADAF">
+        <item name="colorPrimary">@color/uadafDarkColorPrimary</item>
+        <item name="colorPrimaryDark">@color/uadafDarkColorPrimaryDark</item>
+        <item name="colorAccent">@color/uadafDarkColorAccent</item>
+        <item name="android:textColor">@color/uadafDarkTextColor</item>
+        <item name="android:textColorSecondary">@color/uadafDarkSecondaryTextColor</item>
+    </style>
+
+    <style name="AppTheme.UADAFLight" parent="AppTheme.UADAF">
+        <item name="colorPrimary">@color/uadafLightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/uadafLightColorPrimaryDark</item>
+        <item name="colorAccent">@color/uadafLightColorAccent</item>
+        <item name="android:textColor">@color/uadafLightTextColor</item>
+        <item name="android:textColorSecondary">@color/uadafLightSecondaryTextColor</item>
+    </style>
+
+    <!-- AlertDialog themes -->
+
+    <style name="AppTheme.UADAF.Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowBackground">@drawable/background_dialog</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
 
-    <style name="AppTheme.Dialog.PopUp" parent="AppTheme.Dialog">
+    <style name="AppTheme.UADAF.Dialog.Light" parent="Theme.AppCompat.Light.Dialog.Alert">
+
+    </style>
+
+   <style name="AppTheme.UADAF.Dialog.Dark" parent="Theme.AppCompat.Light.Dialog.Alert">
+
+   </style>
+
+    <!-- PopUp Dialogs themes (Maybe deprecated) -->
+
+    <style name="AppTheme.UADAF.Dialog.PopUp" parent="AppTheme.UADAF.Dialog">
         <item name="android:titleTextColor" tools:targetApi="m">#FFFFFF</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:windowEnterAnimation">@anim/anim_dialog_upscale</item>
         <item name="android:windowExitAnimation">@anim/anim_dialog_downscale</item>
+    </style>
+
+    <style name="AppTheme.UADAF.Dialog.PopUp.Light" parent="AppTheme.UADAF.Dialog.PopUp">
+
+    </style>
+
+    <style name="AppTheme.UADAF.Dialog.PopUp.Dark" parent="AppTheme.UADAF.Dialog.PopUp">
+
     </style>
 </resources>

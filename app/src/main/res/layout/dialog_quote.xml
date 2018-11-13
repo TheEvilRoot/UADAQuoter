@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
+    android:background="?attr/colorPrimary"
     android:orientation="vertical"
     android:padding="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"
+        android:background="?attr/colorPrimaryDark"
         android:orientation="horizontal"
         android:padding="4dp">
 
@@ -22,7 +22,7 @@
             android:fontFamily="sans-serif-condensed"
             android:padding="4dp"
             android:text="Добавил:"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp" />
 
         <TextView
@@ -33,7 +33,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="TheEvilRoot"
             android:textAlignment="textEnd"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="?attr/colorPrimaryDark"
         android:orientation="horizontal"
         android:padding="4dp">
 
@@ -53,7 +53,7 @@
             android:fontFamily="sans-serif-condensed"
             android:padding="4dp"
             android:text="Автор:"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp" />
 
         <TextView
@@ -64,7 +64,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="TheEvilRoot"
             android:textAlignment="textEnd"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -73,7 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="8dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="?attr/colorPrimaryDark"
         android:orientation="horizontal"
         android:padding="4dp">
 
@@ -85,7 +85,7 @@
             android:fontFamily="sans-serif-condensed"
             android:padding="4dp"
             android:text="Редактировал:"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -99,7 +99,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="TheEvilRoot"
             android:textAlignment="textEnd"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -114,7 +114,7 @@
             android:layout_marginBottom="-1dp"
             android:text="TextView"
             android:textAlignment="textEnd"
-            android:textColor="#4Dffffff"
+            android:textColor="?android:attr/textColor"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/quote_dialog_editor"
@@ -128,7 +128,7 @@
         android:layout_marginTop="8dp"
         android:fontFamily="sans-serif-condensed"
         android:text="TextView"
-        android:textColor="@android:color/white"
+        android:textColor="?android:attr/textColor"
         android:textSize="16sp" />
 
     <LinearLayout
@@ -144,7 +144,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:background="@drawable/background_image_button"
-            android:tint="@android:color/white"
+            android:tint="?android:attr/textColor"
             app:srcCompat="@drawable/ic_pencil" />
 
         <ImageButton
@@ -154,7 +154,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:background="@drawable/background_image_button"
-            android:tint="@android:color/white"
+            android:tint="?android:attr/textColor"
             app:srcCompat="@drawable/ic_share" />
     </LinearLayout>
 </LinearLayout>
