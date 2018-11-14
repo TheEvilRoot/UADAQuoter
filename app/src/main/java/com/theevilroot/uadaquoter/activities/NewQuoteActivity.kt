@@ -35,6 +35,7 @@ class NewQuoteActivity: AppCompatActivity() {
 
         titleView.text = "Добавление цитаты"
         saveButton.text = "Добавить"
+        adderView.setText(QuoterApi.getAdderName(this))
 
         saveButton.setOnClickListener { _ ->
             val author = authorView.text.toString()
