@@ -35,7 +35,9 @@ fun showPINDialog(context: Context, onPinChanged: (String, AlertDialog, EditText
     val dialog = AlertDialog.Builder(context).setView(view).create()
     with(view) {
         val pinView = findViewById<EditText>(R.id.security_code_field)
-        pinView.addTextChangedListener(TextWatcherWrapper(onChange = { str, _, _, _ -> onPinChanged(str, dialog, pinView) }))
+        pinView.addTextChangedListener(TextWatcherWrapper(onChange = { string, _, _, _ ->
+            onPinChanged(string, dialog, pinView)
+        }))
     }
     dialog.show()
 }
