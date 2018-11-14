@@ -51,8 +51,8 @@ object QuoterApi {
             val res = client.call(URL(reqUrl)) {
                 method = HttpMethod.Post
                 body = FormDataContent(Parameters.build {
-                    args.forEach { t, u ->
-                        append(t, u)
+                    args.entries.forEach { entry->
+                        append(entry.key, entry.value)
                     }
                 })
             }
