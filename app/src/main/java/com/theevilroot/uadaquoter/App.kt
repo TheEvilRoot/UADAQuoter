@@ -16,6 +16,7 @@ class App: Application() {
         declareDressCode(
                 DressCode("UADAF Light", R.style.AppTheme_UADAFDark),
                 DressCode("UADAF Dark", R.style.AppTheme_UADAFLight)
+
         )
     }
 

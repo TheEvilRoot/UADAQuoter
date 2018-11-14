@@ -15,7 +15,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:background="@null"
-        android:tint="?android:attr/textColor"
+        android:tint="?android:attr/textColorPrimary"
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -98,7 +98,7 @@
             android:id="@+id/edit_quote_adder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="?android:attr/textColor" />
+            android:textColor="?android:attr/textColorPrimary" />
 
     </LinearLayout>
 
@@ -128,7 +128,7 @@
             android:layout_height="match_parent"
             android:gravity="top|start"
             android:singleLine="false"
-            android:textColor="?android:attr/textColor" />
+            android:textColor="?android:attr/textColorPrimary" />
 
     </LinearLayout>
 
