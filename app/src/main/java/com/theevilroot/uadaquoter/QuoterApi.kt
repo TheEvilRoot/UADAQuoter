@@ -25,6 +25,7 @@ import io.ktor.http.encodeURLPath
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
 
@@ -149,7 +150,7 @@ object QuoterApi {
         try {
             val file = File(filesDir, "cache.json")
             if (!file.exists())
-                return@async onError(null)
+                return@async onError(FileNotFoundException())
             val json = JsonParser().parse(file.readText()).asJsonObject
             onLoad(json.get("quotes").asJsonArray.map { it.asJsonObject }.map { Quote.fromJson(it) }.map { it.cached = true ; it})
         } catch (e: Exception) {

@@ -16,6 +16,8 @@
         <item name="colorAccent">@color/uadafDarkColorAccent</item>
         <item name="android:textColor">@color/uadafDarkTextColor</item>
         <item name="android:textColorSecondary">@color/uadafDarkSecondaryTextColor</item>
+
+        <item name="actionBarPopupTheme">@style/AppTheme.UADAF.AppBar.PopUp.Dark</item>
     </style>
 
     <style name="AppTheme.UADAFLight" parent="AppTheme.UADAF">
@@ -24,6 +26,8 @@
         <item name="colorAccent">@color/uadafLightColorAccent</item>
         <item name="android:textColor">@color/uadafLightTextColor</item>
         <item name="android:textColorSecondary">@color/uadafLightSecondaryTextColor</item>
+
+        <item name="actionBarPopupTheme">@style/AppTheme.UADAF.AppBar.PopUp.Light</item>
     </style>
 
     <!-- AlertDialog themes -->
@@ -58,5 +62,19 @@
 
     <style name="AppTheme.UADAF.Dialog.PopUp.Dark" parent="AppTheme.UADAF.Dialog.PopUp">
 
+    </style>
+
+    <style name="AppTheme.UADAF.AppBar.PopUp" parent="ThemeOverlay.AppCompat">
+
+    </style>
+
+    <style name="AppTheme.UADAF.AppBar.PopUp.Light" parent="AppTheme.UADAF.AppBar.PopUp">
+        <item name="android:actionMenuTextColor">@color/uadafLightTextColor</item>
+        <item name="android:colorBackground">@color/uadafLightColorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.UADAF.AppBar.PopUp.Dark" parent="AppTheme.UADAF.AppBar.PopUp">
+        <item name="android:actionMenuTextColor">@color/uadafDarkTextColor</item>
+        <item name="android:colorBackground">@color/uadafDarkColorPrimaryDark</item>
     </style>
 </resources>

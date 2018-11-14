@@ -3,10 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/tb_add"
         android:title="Добавить"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
         android:icon="@drawable/ic_plus" />
     <item android:id="@+id/tb_reload"
         android:title="Обновить"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_reload" />
+    <item android:id="@+id/tb_settings"
+        android:title="Настройки"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/tb_licenses"
+        android:title="Лицензии"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/tb_about"
+        android:title="О Проекте"
+        app:showAsAction="never" />
 </menu>
