@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/textColor</item>
         <item name="android:textColorSecondary">@color/textColorSecondary</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
     </style>
 
     <style name="AppTheme.UADAFDark" parent="AppTheme.UADAF">
@@ -16,6 +17,7 @@
         <item name="colorAccent">@color/uadafDarkColorAccent</item>
         <item name="android:textColor">@color/uadafDarkTextColor</item>
         <item name="android:textColorSecondary">@color/uadafDarkSecondaryTextColor</item>
+        <item name="android:textColorPrimary">@color/uadafDarkPrimaryTextColor</item>
 
         <item name="actionBarPopupTheme">@style/AppTheme.UADAF.AppBar.PopUp.Dark</item>
     </style>
@@ -26,6 +28,7 @@
         <item name="colorAccent">@color/uadafLightColorAccent</item>
         <item name="android:textColor">@color/uadafLightTextColor</item>
         <item name="android:textColorSecondary">@color/uadafLightSecondaryTextColor</item>
+        <item name="android:textColorPrimary">@color/uadafLightPrimaryTextColor</item>
 
         <item name="actionBarPopupTheme">@style/AppTheme.UADAF.AppBar.PopUp.Light</item>
     </style>

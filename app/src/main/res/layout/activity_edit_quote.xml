@@ -1,49 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_layout"
-    android:background="?attr/colorPrimaryDark">
+    android:background="?attr/colorPrimary">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <ImageButton
+        android:id="@+id/edit_quote_back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@null"
+        android:tint="?android:attr/textColor"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_arrow_left" />
+
+    <TextView
+        android:id="@+id/edit_quote_title_view"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Edit Quote"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/edit_quote_back_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/edit_quote_subtitle_view"
         android:layout_width="match_parent"
-        android:layout_height="58dp"
-        android:background="?attr/colorPrimaryDark"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </androidx.appcompat.widget.Toolbar>
+        app:layout_constraintTop_toBottomOf="@id/edit_quote_title_view" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:orientation="vertical"
-        android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:layout_constraintTop_toBottomOf="@id/edit_quote_subtitle_view">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:padding="2dp"
+            android:fontFamily="sans-serif"
             android:text="Автор"
-            android:textColor="?android:attr/textColor" />
+            android:textColor="?android:attr/textColorPrimary" />
 
         <AutoCompleteTextView
-            android:id="@+id/eq_author"
+            android:id="@+id/edit_quote_author"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background_text_edit"
-            android:fontFamily="sans-serif-condensed"
             android:textColor="?android:attr/textColor" />
 
     </LinearLayout>
@@ -52,10 +79,10 @@
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:orientation="vertical"
-        android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">
@@ -64,16 +91,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
-            android:padding="2dp"
             android:text="Кто я?"
-            android:textColor="?android:attr/textColor" />
+            android:textColor="?android:attr/textColorPrimary" />
 
         <EditText
-            android:id="@+id/eq_adder"
+            android:id="@+id/edit_quote_adder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background_text_edit"
-            android:fontFamily="sans-serif-condensed"
             android:textColor="?android:attr/textColor" />
 
     </LinearLayout>
@@ -81,13 +105,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:orientation="vertical"
-        android:padding="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/eq_save"
+        app:layout_constraintBottom_toTopOf="@+id/edit_quote_save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -96,17 +119,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:padding="2dp"
             android:text="Цитата"
-            android:textColor="?android:attr/textColor" />
+            android:textColor="?android:attr/textColorPrimary" />
 
         <EditText
-            android:id="@+id/eq_quote"
+            android:id="@+id/edit_quote_quote"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/background_text_edit"
-            android:fontFamily="sans-serif-condensed"
             android:gravity="top|start"
             android:singleLine="false"
             android:textColor="?android:attr/textColor" />
@@ -114,33 +133,40 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/eq_save"
-        android:layout_width="0dp"
+        android:id="@+id/edit_quote_save"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/background_button"
-        android:fontFamily="sans-serif-condensed"
-        android:text="Добавить"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp"
+        android:text="Сохранить"
         android:textColor="?android:attr/textColor"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/eq_status"
+    <ImageButton
+        android:id="@+id/edit_quote_personal_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:fontFamily="sans-serif-condensed"
-        android:text="TextView"
-        android:textAllCaps="true"
-        android:textSize="18sp"
-        android:visibility="gone"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/background_button"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:tint="?android:attr/textColor"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/linearLayout" />
+        app:srcCompat="@drawable/ic_account" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,18 +5,21 @@
     <color name="colorAccent">#80cbc4</color>
     <color name="textColor">#000</color>
     <color name="textColorSecondary">#818181</color>
+    <color name="textColorPrimary">#FFF</color>
 
     <color name="uadafLightColorPrimary">#FFF</color>
     <color name="uadafLightColorPrimaryDark">#2C2F33</color>
     <color name="uadafLightColorAccent">#7289DA</color>
     <color name="uadafLightTextColor">#FFFFFF</color>
     <color name="uadafLightSecondaryTextColor">#99AAB5</color>
+    <color name="uadafLightPrimaryTextColor">#000</color>
 
     <color name="uadafDarkColorPrimary">#23272A</color>
     <color name="uadafDarkColorPrimaryDark">#2C2F33</color>
     <color name="uadafDarkColorAccent">#2C2F33</color>
     <color name="uadafDarkTextColor">#FFFFFF</color>
     <color name="uadafDarkSecondaryTextColor">#99AAB5</color>
+    <color name="uadafDarkPrimaryTextColor">#FFF</color>
 
 
     <color name="ic_launcher_background">#343434</color>
