@@ -23,8 +23,10 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.NewQuoteActivity" android:label="Добавление цитат"/>
-        <activity android:name=".activities.EditQuoteActivity" android:label="Редактирование цитат" />
+        <activity android:name=".activities.NewQuoteActivity"/>
+        <activity android:name=".activities.EditQuoteActivity"/>
+        <activity android:name=".activities.LicensesActivity" />
+
         <receiver android:name=".widget.RandomQuoteWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
