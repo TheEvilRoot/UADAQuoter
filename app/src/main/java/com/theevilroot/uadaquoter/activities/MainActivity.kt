@@ -29,6 +29,7 @@ import com.theevilroot.uadaquoter.objects.MessageAction
 import com.theevilroot.uadaquoter.objects.MessageActionType
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
+import daio.io.dresscode.dressCodeStyleId
 import daio.io.dresscode.matchDressCode
 import java.io.FileNotFoundException
 
@@ -232,6 +233,14 @@ class MainActivity : AppCompatActivity() {
             R.id.tb_reload -> reload()
             R.id.tb_add -> {
                startActivity(Intent(this, NewQuoteActivity::class.java))
+            }
+            R.id.tb_test_light -> {
+                dressCodeStyleId = R.style.AppTheme_UADAFLight
+                matchDressCode()
+            }
+            R.id.tb_test_dark -> {
+                dressCodeStyleId = R.style.AppTheme_UADAFDark
+                matchDressCode()
             }
         }
         return super.onOptionsItemSelected(item)

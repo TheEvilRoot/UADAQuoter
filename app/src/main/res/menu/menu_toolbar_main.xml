@@ -20,4 +20,8 @@
     <item android:id="@+id/tb_about"
         android:title="О Проекте"
         app:showAsAction="never" />
+    <group>
+        <item android:id="@+id/tb_test_light" android:title="Light theme" app:showAsAction="never"/>
+        <item android:id="@+id/tb_test_dark" android:title="Dark theme" app:showAsAction="never" />
+    </group>
 </menu>
