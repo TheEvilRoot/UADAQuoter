@@ -7,9 +7,8 @@ import com.theevilroot.uadaquoter.objects.License
 
 class LicensesAdapter: RecyclerView.Adapter<LicensesAdapter.LicenseHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LicenseHolder {
-
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
-
 
     override fun getItemCount(): Int {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -21,11 +20,9 @@ class LicensesAdapter: RecyclerView.Adapter<LicensesAdapter.LicenseHolder>() {
 
 
     class LicenseHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-
-        fun bind(license: License) {
-
+        fun bind(item: License) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
-
     }
 
 }
