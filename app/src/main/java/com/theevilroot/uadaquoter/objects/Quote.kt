@@ -1,8 +1,16 @@
 package com.theevilroot.uadaquoter.objects
 
 import com.google.gson.JsonObject
+import com.google.gson.annotations.SerializedName
 
-data class Quote(val id: Int, val adder: String, val author: String, val text: String, var cached: Boolean = false, var editedBy: String?, var editedAt: Long) {
+class Quote(@SerializedName("id") var id: Int,
+            @SerializedName("adder") var adder: String,
+            @SerializedName("author") var author: String,
+            quote: String, var cached: Boolean = false,
+            @SerializedName("edited_by") var editedBy: String? = null,
+            @SerializedName("edited_at") var editedAt: Long = -1,
+            @SerializedName("quote") var text: String = quote) {
+
 
     fun toJson():JsonObject {
         val obj = JsonObject()
@@ -14,6 +22,7 @@ data class Quote(val id: Int, val adder: String, val author: String, val text: S
         obj.addProperty("edited_at", editedAt)
         return obj
     }
+
     companion object {
         fun fromJson(obj: JsonObject): Quote =
                 Quote(obj["id"].asInt,

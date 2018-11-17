@@ -11,17 +11,10 @@ import com.theevilroot.uadaquoter.utils.contains
 import com.theevilroot.uadaquoter.utils.getOrDef
 import io.ktor.client.HttpClient
 import io.ktor.client.call.call
-import io.ktor.client.call.receive
 import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.get
-import io.ktor.client.request.url
-import io.ktor.client.response.readBytes
 import io.ktor.client.response.readText
 import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
-import io.ktor.http.encodeURLPath
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import java.io.File

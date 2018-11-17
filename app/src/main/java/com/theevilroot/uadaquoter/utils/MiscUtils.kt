@@ -6,7 +6,6 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
-import androidx.core.content.ContextCompat.startActivity
 import android.content.Intent
 import android.net.Uri
 
