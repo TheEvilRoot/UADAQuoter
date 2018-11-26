@@ -22,6 +22,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
 
+@Deprecated("See RxQuoterApi")
 object QuoterApi {
 
     var quotes = ArrayList<Quote>()
@@ -38,6 +39,7 @@ object QuoterApi {
 
     private const val backendUrl = "http://52.48.142.75:8888/backend/quoter"
 
+    @Deprecated("")
     fun req(reqUrl: String, args: Map<String, String>, onLoad: (JsonObject) -> Unit, onError: (Throwable?) -> Unit) =  GlobalScope.async {
         try {
             val client = HttpClient()
@@ -62,6 +64,7 @@ object QuoterApi {
         }
     }
 
+    @Deprecated("See RxQuoterApi")
     fun getPos(pos: Int, onLoad: (Quote) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "pos", "pos" to pos.toString()), { json ->
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
@@ -73,6 +76,7 @@ object QuoterApi {
         onLoad(Quote.fromJson(data))
     }, onError)
 
+    @Deprecated("See RxQuoterApi")
     fun getFromTo(from: Int, to: Int, onLoad: (List<Quote>) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "fromto", "from" to from.toString(), "to" to to.toString()), { json ->
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
@@ -85,7 +89,7 @@ object QuoterApi {
         onLoad(quotes.map { it.asJsonObject }.map { Quote.fromJson(it) })
     }, onError)
 
-
+    @Deprecated("See RxQuoterApi")
     fun getRandom(onLoad: (Quote) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "rand"), { json ->
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
@@ -97,6 +101,7 @@ object QuoterApi {
         onLoad(Quote.fromJson(data))
     }, onError)
 
+    @Deprecated("See RxQuoterApi")
     fun getTotal(onLoad: (Int) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "total"), { json ->
         if(arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
@@ -108,6 +113,7 @@ object QuoterApi {
         onLoad(data["count"].asInt)
     }, onError)
 
+    @Deprecated("See RxQuoterApi")
     fun add(adder: String, author: String,quote: String ,key: String, onLoad: () -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "ADD", "key" to key, "author" to author, "adder" to adder, "quote" to quote), { json ->
         if(arrayOf("error", "message") !in json)
             return@req onError(APIException("Malformed response"))
@@ -116,6 +122,7 @@ object QuoterApi {
         onLoad()
     }, onError)
 
+    @Deprecated("See RxQuoterApi")
     fun edit(id: Int, edited_by: String, quote: String, key: String, onLoad: () -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "EDIT", "key" to key, "id" to id.toString(), "edited_by" to edited_by, "new_text" to quote), { json ->
         if(arrayOf("error", "message") !in json)
             return@req onError(APIException("Malformed response"))
@@ -124,6 +131,7 @@ object QuoterApi {
         onLoad()
     }, onError)
 
+    @Deprecated("See RxQuoterApi")
     fun saveCache(filesDir: File, onSuccess: () -> Unit, onError: (Throwable?) -> Unit) = GlobalScope.async {
         try {
             val file = File(filesDir, "cache.json")
@@ -139,6 +147,8 @@ object QuoterApi {
             onError(e)
         }
     }
+
+    @Deprecated("See RxQuoterApi")
     fun loadCache(filesDir: File, onLoad: (List<Quote>) -> Unit, onError: (Throwable?) -> Unit) = GlobalScope.async {
         try {
             val file = File(filesDir, "cache.json")
@@ -151,20 +161,23 @@ object QuoterApi {
         }
     }
 
+    @Deprecated("See RxQuoterApi")
     fun getAdderName(context: Context): String {
         val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
         return preferences.getString("adderName", "") ?: ""
     }
 
+    @Deprecated("See RxQuoterApi")
     fun setAdderName(context: Context, name: String): String {
         val preferences = context.getSharedPreferences("UADAQuoter", Context.MODE_PRIVATE)
         preferences.edit().putString("adderName", name).apply()
         return getAdderName(context)
     }
 
+    @Deprecated("See RxQuoterApi")
     fun shareQuote(context: Context, quote: Quote) {
         val intent = Intent(Intent.ACTION_SEND)
-        intent.putExtra(Intent.EXTRA_TEXT, "${quote.author}:\n${quote.text}\n(c) Цитатник UADAF")
+        intent.putExtra(Intent.EXTRA_TEXT, "${quote.author}:\n${quote.quote}\n(c) Цитатник UADAF")
         intent.type = "text/plain"
         context.startActivity(intent)
     }

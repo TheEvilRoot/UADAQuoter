@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.objects.TextWatcherWrapper
 
+@Deprecated("See RxQuoterApi")
 fun showAdderNameDialog(context: Context, defaultValue: String, onSave: (EditText, TextView, AlertDialog) -> Unit, cancelable: Boolean = true) {
     val view = LayoutInflater.from(context).inflate(R.layout.personal_data, null, false)
     val dialog = AlertDialog.Builder(context).setView(view).setCancelable(cancelable).create()

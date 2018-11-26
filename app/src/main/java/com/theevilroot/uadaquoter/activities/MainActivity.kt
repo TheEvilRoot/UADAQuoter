@@ -1,35 +1,40 @@
 package com.theevilroot.uadaquoter.activities
 
 import android.Manifest
+import android.accounts.NetworkErrorException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
+import android.net.ConnectivityManager
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
+import android.os.PersistableBundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.PermissionChecker
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jetradar.permissions.PermissionsDeniedException
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.adapters.MessagesAdapter
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.objects.MessageAction
-import com.theevilroot.uadaquoter.objects.MessageActionType
+import com.theevilroot.uadaquoter.objects.Quote
+import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
-import com.theevilroot.uadaquoter.utils.showAdderNameDialog
 import daio.io.dresscode.dressCodeStyleId
 import daio.io.dresscode.matchDressCode
+import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.io.FileNotFoundException
 
 class MainActivity : AppCompatActivity() {
@@ -43,18 +48,268 @@ class MainActivity : AppCompatActivity() {
     private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
     private val appbarButton by bind<FloatingActionButton>(R.id.app_bar_button)
     private val messagesView by bind<RecyclerView>(R.id.messages_view)
+    private val loadingView by bind<View>(R.id.loading_view)
 
     private var permissionGranted: Boolean = false
+
+    private val permissionsDelegate = App.instance.permissionsActivityDelegate
+    private val api = App.instance.api
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDressCode()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(appbar)
+        permissionsDelegate.attach(this)
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         setupQuotesView()
         setupMessagesView()
+
+        checkPermissions()
+    }
+
+    /** Main logic stuff **/
+
+    private fun checkPermissions() =
+            compositeDisposable.add(App.instance.butler
+                    .require(true,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        requestUserdata()
+                        init()
+                    }) {
+                        if (it is PermissionsDeniedException) {
+                            addPermissionDeniedMessage()
+                            init()
+                        } else addErrorMessage(it)
+                    })
+
+    private fun requestUserdata() {
+        if (api.username() == null)
+            compositeDisposable.add(api.requestUserdata(this, "")
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe({ api.username(it) }, {
+                        if (it !is DialogCanceledException)
+                            addErrorMessage(it)
+                        addUserdataNotSpecifiedMessage()
+                    }))
+    }
+
+    private fun init() {
+        showLoading()
+        compositeDisposable.add(checkConnection()
+                .subscribe(this::checkService) {
+                    if (it is NetworkErrorException)
+                        addNetworkErrorMessage()
+                    else addErrorMessage(it)
+                    loadFromCache()
+                })
+    }
+
+    private fun checkService() {
+        compositeDisposable.add(api.isServiceAvailable()
+                .subscribe(this::loadFromServer) {
+                    addServiceUnavailableMessage()
+                    loadFromCache()
+                    it.printStackTrace()
+                })
+    }
+
+    private fun loadFromCache() {
+        clearQuotesDatabase(true)
+        compositeDisposable.add(api.getCache()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    addQuote(it)
+                }, {
+                    hideLoading()
+                    if (it is FileNotFoundException) {
+                        addFirstRunMessage()
+                    } else addErrorMessage(it)
+                }) {
+                    addQuotesLoadedMessage()
+                    hideLoading()
+                })
+    }
+
+    private fun loadFromServer() {
+        clearQuotesDatabase(true)
+        compositeDisposable.add(api.getAll()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    addQuote(it)
+                }, {
+                    addErrorMessage(it)
+                    loadFromCache()
+                }) {
+                    hideLoading()
+                    addQuotesLoadedMessage()
+                })
+    }
+
+    private fun checkConnection() = Completable.create {
+        val service = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = service.activeNetworkInfo
+        if (activeNetwork.isConnected)
+            it.onComplete()
+        else it.onError(NetworkErrorException())
+    }
+
+    private fun addQuote(quote: Quote) {
+        App.instance.quotes.add(quote)
+        quotesAdapter.notifyItemInserted(App.instance.quotes.size - 1)
+    }
+
+    private fun clearQuotesDatabase(notifyAdapter: Boolean) {
+        if (App.instance.quotes.isNotEmpty()) {
+            App.instance.quotes.clear()
+            if (notifyAdapter)
+                quotesAdapter.notifyDataSetChanged()
+        }
+    }
+
+    /** Messages stuff **/
+
+    private fun addUserdataNotSpecifiedMessage() {
+        addMessage("UserdataNotSpecified", "UserdataNotSpecifiedMessage", android.R.color.holo_green_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addErrorMessage(t: Throwable) {
+        t.printStackTrace()
+        addMessage("Error", t::class.java.simpleName, android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addPermissionDeniedMessage() {
+        addMessage("PermissionDenied", "PermissionDeniedMessage", android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addNetworkErrorMessage() {
+        addMessage("NetworkError", "NetworkErrorMessage", android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addFirstRunMessage() {
+        addMessage("FirstRun", "FirstRunMessage", android.R.color.holo_green_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addQuotesLoadedMessage() {
+        addMessage("QuotesLoaded", App.instance.quotes.count().toString(), android.R.color.holo_green_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addServiceUnavailableMessage() {
+        addMessage("ServiceUnavailable", "ServiceUnavailableMessage", android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+    }
+
+    private fun addMessage(title: String,
+                           message: String,
+                           @ColorRes color: Int,
+                           @DrawableRes icon: Int,
+                           actions: List<MessageAction> = listOf(MessageAction())) {
+        messagesAdapter.addMessage(Message(title, message, color, icon, actions))
+    }
+
+
+    /** UI setting up stuff **/
+
+    private fun setupMessagesView() {
+        messagesAdapter = MessagesAdapter()
+        messagesView.layoutManager = GridLayoutManager(this, 1)
+        messagesView.adapter = messagesAdapter
+        ItemTouchHelper(object: ItemTouchHelper.Callback() {
+            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
+                    true
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                messagesAdapter.dismissMessage(viewHolder.adapterPosition)
+            }
+        }).attachToRecyclerView(messagesView)
+    }
+
+    private fun setupQuotesView() {
+        quotesAdapter = QuotesAdapter()
+        quotesView.layoutManager = GridLayoutManager(this, 1)
+        quotesView.adapter = quotesAdapter
+    }
+
+    private fun showLoading() {
+        loadingView.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        loadingView.visibility = View.GONE
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.tb_reload -> { }
+            R.id.tb_add -> {
+                startActivity(Intent(this, NewQuoteActivity::class.java))
+            }
+            R.id.tb_test_light -> {
+                dressCodeStyleId = R.style.AppTheme_UADAFLight
+                matchDressCode()
+            }
+            R.id.tb_test_dark -> {
+                dressCodeStyleId = R.style.AppTheme_UADAFDark
+                matchDressCode()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    /** System stuff **/
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        permissionsDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onDestroy() {
+        if (!compositeDisposable.isDisposed)
+            compositeDisposable.dispose()
+        permissionsDelegate.detach()
+        super.onDestroy()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_toolbar_main, menu)
+        return true
+    }
+
+   /** override fun onCreate(savedInstanceState: Bundle?) {
+        matchDressCode()
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(appbar)
+        imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        // ================================================================
+
+        setupQuotesView()
+        setupMessagesView()
         checkPermission()
+
+
+        // ================================================================
+
+        permissionsDelegate.attach(this)
+        compositeDisposable.add(App.instance.butler.require(true,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                .subscribe({
+
+                }) {
+
+                })
+
+
     }
 
     private fun checkPermission() {
@@ -90,6 +345,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+
+        // =================================================================================
+
         when (requestCode) {
             6741 -> if (grantResults.all { it == PermissionChecker.PERMISSION_GRANTED }) {
                 onPermissionGranted()
@@ -97,6 +355,16 @@ class MainActivity : AppCompatActivity() {
                 onPermissionDenied()
             }
         }
+
+        // =================================================================================
+
+        permissionsDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        permissionsDelegate.detach()
     }
 
     private fun loadUserdata() {
@@ -184,7 +452,7 @@ class MainActivity : AppCompatActivity() {
                         }),
                         MessageAction("Отправить отчет", MessageActionType.TYPE_ACTION, action = { context ->
                             val intent = Intent(Intent.ACTION_SENDTO)
-                            intent.type = "text/plain"
+                            intent.type = "quote/plain"
                             intent.putExtra(Intent.EXTRA_SUBJECT, "UADAQuoter report")
                             intent.putExtra(Intent.EXTRA_TEXT, e?.message )
                             intent.data = Uri.parse("mailto:theevilroot6741@gmail.com")
@@ -260,5 +528,13 @@ class MainActivity : AppCompatActivity() {
                 })
         )))
     }
+
+    private fun addPermissionError() {
+        messagesAdapter.addMessage(Message("Ошибка доступа", "У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя.", android.R.color.holo_red_dark, R.drawable.ic_trash_can, listOf(
+                MessageAction("Попробовать снова", MessageActionType.TYPE_ACTION, action = { _ ->
+
+                })
+        )))
+    } **/
 
 }

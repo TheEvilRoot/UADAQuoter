@@ -39,14 +39,14 @@ class EditQuoteActivity : AppCompatActivity() {
         authorView.setText(quote.author)
         authorView.isEnabled = false
         adderView.setText(QuoterApi.getAdderName(this))
-        quoteView.setText(quote.text)
+        quoteView.setText(quote.quote)
         saveButton.text = "Сохранить"
         
         saveButton.setOnClickListener {_ ->
             val text = quoteView.text.toString()
             val adder = adderView.text.toString()
 
-            if(quoteView.text.toString() == quote.text) {
+            if(quoteView.text.toString() == quote.quote) {
                 subtitleView.text = "Что-то изменилось?"
                 return@setOnClickListener
             }
