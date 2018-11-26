@@ -5,12 +5,24 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonParser
+import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.widget.textChanges
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.objects.Quote
+import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
 import com.theevilroot.uadaquoter.utils.showPINDialog
 import daio.io.dresscode.matchDressCode
+import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function
+import io.reactivex.functions.Function3
+import io.reactivex.schedulers.Schedulers
+import java.lang.Exception
 
 class EditQuoteActivity : AppCompatActivity() {
 
@@ -23,7 +35,77 @@ class EditQuoteActivity : AppCompatActivity() {
     private val subtitleView by bind<TextView>(R.id.edit_quote_subtitle_view)
     private val personalDataButton by bind<ImageButton>(R.id.edit_quote_personal_data)
 
-    private lateinit var quote: Quote
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val api = App.instance.api
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        matchDressCode()
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_edit_quote)
+
+        compositeDisposable.add(extractQuote()
+                .subscribe(this::initViewsWithQuote, this::onParseError))
+
+    }
+
+    private fun initViewsWithQuote(quote: Quote) {
+        authorView.setText(quote.author)
+        authorView.isEnabled = false
+        adderView.setText(api.username() ?: "")
+        quoteView.setText(quote.quote)
+        titleView.append(" #${quote.id}")
+        saveButton.text = "Сохранить"
+
+        compositeDisposable.add(Observable.combineLatest <CharSequence, CharSequence, Boolean> (
+                adderView.textChanges(),
+                quoteView.textChanges(), BiFunction<CharSequence,CharSequence ,Boolean> { adder, text -> adder.isNotBlank() && text.isNotBlank()  })
+                .subscribe(saveButton::setEnabled))
+
+        compositeDisposable.add(saveButton.clicks().subscribe {
+            val editor = adderView.text.toString()
+            val text = quoteView.text.toString()
+
+            compositeDisposable.add(api.showSecurityDialog(this@EditQuoteActivity)
+                    .subscribe({ key ->
+                        compositeDisposable.add(api.edit(key, quote.id, editor, text)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::showSuccess, this::showError))
+                    }, { throwable ->
+                        if (throwable is DialogCanceledException)
+                            showInvalidKey()
+                        else showError(throwable)
+                    }))
+        })
+    }
+
+    private fun showInvalidKey() {
+        subtitleView.text = "Ключ неверен"
+    }
+
+    private fun showSuccess() {
+        subtitleView.text = "Успешно"
+    }
+
+    private fun showError(t: Throwable) {
+        t.printStackTrace()
+        subtitleView.text = "Ошибка: ${t::class.java.simpleName}"
+    }
+
+    private fun onParseError(t: Throwable) {
+        Toast.makeText(this, "Неудалось получить цитату", Toast.LENGTH_LONG).show()
+        finish()
+    }
+
+    private fun extractQuote(): Single<Quote> = Single.create <Quote> {
+        val quote = try {
+            Quote.fromJson(JsonParser().parse(intent?.extras?.getString("quote")).asJsonObject)
+        } catch (e: Exception) {
+            return@create it.onError(e)
+        }
+
+        it.onSuccess(quote)
+    }
 
   /**  @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -48,7 +48,7 @@ class NewQuoteActivity: AppCompatActivity() {
                 quoteView.textChanges(), Function3 { author, adder, quote -> author.isNotBlank() && adder.isNotBlank() && quote.isNotBlank() })
                 .subscribe(saveButton::setEnabled))
 
-        saveButton.clicks().subscribe {
+        compositeDisposable.add(saveButton.clicks().subscribe {
             val author = authorView.text.toString()
             val adder = adderView.text.toString()
             val quote = quoteView.text.toString()
@@ -64,7 +64,7 @@ class NewQuoteActivity: AppCompatActivity() {
                             showInvalidKey()
                         else showError(throwable)
                     }))
-        }
+        })
     }
 
     private fun showSuccess() {
@@ -80,7 +80,7 @@ class NewQuoteActivity: AppCompatActivity() {
     }
 
     private fun showInvalidKey() {
-
+        subtitleView.text = "Ключ неверен"
     }
 
     override fun onDestroy() {
