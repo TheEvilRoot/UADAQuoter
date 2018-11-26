@@ -4,17 +4,17 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.widget.textChanges
 import com.theevilroot.uadaquoter.*
-import com.theevilroot.uadaquoter.references.PrivateReferences
-import kotlin.concurrent.thread
-// Change it to com.theevilroot.uadaquoter.references.References.CODE_PREFIX
-// Change it to com.theevilroot.uadaquoter.references.References.CODE
-import com.theevilroot.uadaquoter.references.PrivateReferences.CODE_PREFIX
-import com.theevilroot.uadaquoter.references.PrivateReferences.CODE
+import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
-import com.theevilroot.uadaquoter.utils.showAdderNameDialog
-import com.theevilroot.uadaquoter.utils.showPINDialog
 import daio.io.dresscode.matchDressCode
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Function3
+import io.reactivex.schedulers.Schedulers
 
 class NewQuoteActivity: AppCompatActivity() {
 
@@ -27,7 +27,69 @@ class NewQuoteActivity: AppCompatActivity() {
     private val subtitleView by bind<TextView>(R.id.edit_quote_subtitle_view)
     private val personalDataButton by bind<ImageButton>(R.id.edit_quote_personal_data)
 
-    @SuppressLint("SetTextI18n")
+    private val api = App.instance.api
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        matchDressCode()
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_edit_quote)
+        init()
+    }
+
+    @SuppressLint("CheckResult")
+    private fun init() {
+        titleView.text = "Добавление цитаты"
+        saveButton.text = "Добавить"
+        adderView.setText(api.username() ?: "")
+        compositeDisposable.add(Observable.combineLatest <CharSequence, CharSequence, CharSequence, Boolean> (
+                authorView.textChanges(),
+                adderView.textChanges(),
+                quoteView.textChanges(), Function3 { author, adder, quote -> author.isNotBlank() && adder.isNotBlank() && quote.isNotBlank() })
+                .subscribe(saveButton::setEnabled))
+
+        saveButton.clicks().subscribe {
+            val author = authorView.text.toString()
+            val adder = adderView.text.toString()
+            val quote = quoteView.text.toString()
+
+            compositeDisposable.add(api.showSecurityDialog(this@NewQuoteActivity)
+                    .subscribe({ key ->
+                        compositeDisposable.add(api.add(key, adder, author, quote)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::showSuccess, this::showError))
+                    }, { throwable ->
+                        if (throwable is DialogCanceledException)
+                            showInvalidKey()
+                        else showError(throwable)
+                    }))
+        }
+    }
+
+    private fun showSuccess() {
+        authorView.text.clear()
+        adderView.text.clear()
+        quoteView.text.clear()
+        subtitleView.text = "Успешно"
+    }
+
+    private fun showError(t: Throwable) {
+        t.printStackTrace()
+        subtitleView.text = "Ошибка: ${t::class.java.simpleName}"
+    }
+
+    private fun showInvalidKey() {
+
+    }
+
+    override fun onDestroy() {
+        if (!compositeDisposable.isDisposed)
+            compositeDisposable.dispose()
+        super.onDestroy()
+    }
+
+    /** @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDressCode()
         super.onCreate(savedInstanceState)
@@ -79,6 +141,6 @@ class NewQuoteActivity: AppCompatActivity() {
         backButton.setOnClickListener {
             onBackPressed()
         }
-    }
+    } **/
 
 }

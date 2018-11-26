@@ -151,7 +151,11 @@ object RxQuoterApi {
          */
         fun add(key: String, adder: String, author: String, quote: String): Completable = Completable.create {
             try {
-                quoter().add(key, adder, author, quote)
+                val result = quoter().add(key, adder, author, quote)
+                val response = result.execute()
+                if (!response.isSuccessful)
+                    it.onError(IOException())
+                it.onComplete()
             } catch (e: Exception) {
                 it.onError(e)
             }
@@ -166,7 +170,11 @@ object RxQuoterApi {
          */
         fun edit(key: String, id: Int, editedBy: String, newText: String): Completable = Completable.create {
             try {
-                quoter().edit(key, id, editedBy, newText)
+                val result = quoter().edit(key, id, editedBy, newText)
+                val response = result.execute()
+                if (!response.isSuccessful)
+                    it.onError(IOException())
+                it.onComplete()
             } catch (e: Exception) {
                 it.onError(e)
             }
@@ -269,20 +277,25 @@ object RxQuoterApi {
 
         /**
          *  @param context - Context to show dialog
-         *  @return Observable that emits string value on edit view's text changes. Completes on dialog dissmiss or cancel
          */
-        fun showSecurityDialog(context: Context): Observable<String> = Observable.create <String> {
+        fun showSecurityDialog(context: Context): Single<String> = Single.create <String> {
             val view = LayoutInflater.from(context).inflate(R.layout.security_code_dialog_layout, null, false)
             val dialog = AlertDialog.Builder(context).setView(view).create()
             val pinView = view.findViewById<EditText>(R.id.security_code_field)
-            pinView.textChanges()
+
+            val disposable = pinView.textChanges()
                     .map(CharSequence::toString)
-                    .subscribe(it::onNext)
+                    .filter(App.instance.references::isKeyValid)
+                    .subscribe { key ->
+                        it.onSuccess(key)
+                        dialog.dismiss()
+                    }
             dialog.setOnCancelListener { _ ->
-                it.onComplete()
+                disposable.dispose()
+                it.onError(DialogCanceledException())
             }
             dialog.setOnDismissListener { _ ->
-                it.onComplete()
+                disposable.dispose()
             }
             dialog.show()
         }
@@ -331,7 +344,7 @@ object RxQuoterApi {
                 @Field("adder") adder: String,
                 @Field("author") author: String,
                 @Field("quote") quote: String
-        )
+        ): Call<ResponseBody>
 
         @Headers(defaultHeader)
         @FormUrlEncoded
@@ -341,7 +354,7 @@ object RxQuoterApi {
                 @Field("id") id: Int,
                 @Field("edited_by") editedBy: String,
                 @Field("new_text") newText: String
-        )
+        ): Call<ResponseBody>
 
         @Headers(defaultHeader)
         @GET("/")

@@ -56,6 +56,13 @@ class MainActivity : AppCompatActivity() {
     private val api = App.instance.api
     private val compositeDisposable = CompositeDisposable()
 
+    private val mIdUserdataNotSpecified = 1
+    private val mIdPermissionDenied = 2
+    private val mIdNetworkError = 3
+    private val mIdFirstRun = 4
+    private val mIdQuotesLoaded = 5
+    private val mIdServiceUnavailable = 6
+
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDressCode()
         super.onCreate(savedInstanceState)
@@ -112,6 +119,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkService() {
         compositeDisposable.add(api.isServiceAvailable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::loadFromServer) {
                     addServiceUnavailableMessage()
                     loadFromCache()
@@ -177,7 +186,11 @@ class MainActivity : AppCompatActivity() {
     /** Messages stuff **/
 
     private fun addUserdataNotSpecifiedMessage() {
-        addMessage("UserdataNotSpecified", "UserdataNotSpecifiedMessage", android.R.color.holo_green_dark, R.drawable.ic_trash_can)
+        addMessage("UserdataNotSpecified",
+                "UserdataNotSpecifiedMessage",
+                android.R.color.holo_green_dark,
+                R.drawable.ic_trash_can,
+                id = mIdUserdataNotSpecified)
     }
 
     private fun addErrorMessage(t: Throwable) {
@@ -186,31 +199,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addPermissionDeniedMessage() {
-        addMessage("PermissionDenied", "PermissionDeniedMessage", android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+        addMessage("PermissionDenied",
+                "PermissionDeniedMessage",
+                android.R.color.holo_red_dark,
+                R.drawable.ic_trash_can,
+                id = mIdPermissionDenied)
     }
 
     private fun addNetworkErrorMessage() {
-        addMessage("NetworkError", "NetworkErrorMessage", android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+        addMessage("NetworkError",
+                "NetworkErrorMessage",
+                android.R.color.holo_red_dark,
+                R.drawable.ic_trash_can,
+                id = mIdNetworkError)
     }
 
     private fun addFirstRunMessage() {
-        addMessage("FirstRun", "FirstRunMessage", android.R.color.holo_green_dark, R.drawable.ic_trash_can)
+        addMessage("FirstRun",
+                "FirstRunMessage",
+                android.R.color.holo_green_dark,
+                R.drawable.ic_trash_can,
+                id = mIdFirstRun)
     }
 
     private fun addQuotesLoadedMessage() {
-        addMessage("QuotesLoaded", App.instance.quotes.count().toString(), android.R.color.holo_green_dark, R.drawable.ic_trash_can)
+        addMessage("QuotesLoaded",
+                App.instance.quotes.count().toString(),
+                android.R.color.holo_green_dark,
+                R.drawable.ic_trash_can,
+                id = mIdQuotesLoaded)
     }
 
     private fun addServiceUnavailableMessage() {
-        addMessage("ServiceUnavailable", "ServiceUnavailableMessage", android.R.color.holo_red_dark, R.drawable.ic_trash_can)
+        addMessage("ServiceUnavailable",
+                "ServiceUnavailableMessage",
+                android.R.color.holo_red_dark,
+                R.drawable.ic_trash_can,
+                id = mIdServiceUnavailable)
     }
 
     private fun addMessage(title: String,
                            message: String,
                            @ColorRes color: Int,
                            @DrawableRes icon: Int,
-                           actions: List<MessageAction> = listOf(MessageAction())) {
-        messagesAdapter.addMessage(Message(title, message, color, icon, actions))
+                           actions: List<MessageAction> = listOf(MessageAction()),
+                           id: Int? = null) {
+        return messagesAdapter.addMessage(Message(title, message, color, icon, actions, id))
     }
 
 
@@ -249,7 +283,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.tb_reload -> { }
+            R.id.tb_reload -> checkPermissions()
             R.id.tb_add -> {
                 startActivity(Intent(this, NewQuoteActivity::class.java))
             }

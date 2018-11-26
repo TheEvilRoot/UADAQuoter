@@ -10,12 +10,20 @@ import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.utils.bindView
 
-
 class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
 
     private val messages: ArrayList<Message> = ArrayList()
 
     fun addMessage(message: Message) {
+        if (message.uniqueID != null) {
+            for (index in messages.indices) {
+                if (messages[index].uniqueID == message.uniqueID) {
+                    messages[index] = message
+                    notifyItemChanged(index)
+                    return
+                }
+            }
+        }
         messages.add(message)
         notifyItemInserted(messages.count() - 1)
     }
@@ -40,6 +48,7 @@ class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
         private val contentView by bindView<TextView>(R.id.message_content)
         private val headView by bindView<View>(R.id.message_head)
         private val actionsView by bindView<RecyclerView>(R.id.message_actions_view)
+        private val headerIndicator by bindView<View>(R.id.message_header_indicator)
 
         private lateinit var actionsAdapter: MessageActionsAdapter
 
@@ -51,6 +60,9 @@ class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
             contentView.text = message.message
             actionsView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
             actionsView.adapter = actionsAdapter
+            if (message.actions.isNotEmpty())
+                headerIndicator.visibility = View.VISIBLE
+            else headerIndicator.visibility = View.GONE
         }
     }
 

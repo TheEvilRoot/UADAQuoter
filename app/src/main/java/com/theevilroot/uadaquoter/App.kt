@@ -6,6 +6,7 @@ import com.jetradar.permissions.MrButler
 import com.jetradar.permissions.PermissionsActivityDelegate
 import com.theevilroot.uadaquoter.objects.License
 import com.theevilroot.uadaquoter.objects.Quote
+import com.theevilroot.uadaquoter.references.PrivateReferences
 import daio.io.dresscode.DressCode
 import daio.io.dresscode.declareDressCode
 
@@ -23,6 +24,9 @@ class App: Application() {
 
     val permissionsActivityDelegate = PermissionsActivityDelegate()
     val butler = MrButler(permissionsActivityDelegate)
+    val references = PrivateReferences()
+
+
     lateinit var api: RxQuoterApi.QuoterServiceApi
 
     override fun onCreate() {

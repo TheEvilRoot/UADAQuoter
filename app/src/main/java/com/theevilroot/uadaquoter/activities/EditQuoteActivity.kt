@@ -7,10 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.*
 import com.theevilroot.uadaquoter.objects.Quote
-// Change it to com.theevilroot.uadaquoter.references.References.CODE_PREFIX
-// Change it to com.theevilroot.uadaquoter.references.References.CODE
-import com.theevilroot.uadaquoter.references.PrivateReferences.CODE_PREFIX
-import com.theevilroot.uadaquoter.references.PrivateReferences.CODE
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.showAdderNameDialog
 import com.theevilroot.uadaquoter.utils.showPINDialog
@@ -29,7 +25,7 @@ class EditQuoteActivity : AppCompatActivity() {
 
     private lateinit var quote: Quote
 
-    @SuppressLint("SetTextI18n")
+  /**  @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDressCode()
         super.onCreate(savedInstanceState)
@@ -84,6 +80,6 @@ class EditQuoteActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             onBackPressed()
         }
-    }
+    } **/
 
 }
