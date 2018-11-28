@@ -416,6 +416,11 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
                 App.instance.messages.add(event.message)
                 messagesAdapter.notifyItemInserted(App.instance.messages.count() - 1)
                 updateMessagesBadge(messagesAdapter.messagesCount())
+                if (isFirstMessage) {
+                    if (!messagesView.isShown)
+                        toggleMessagesViewState()
+                    isFirstMessage = false
+                }
             }
             MessageEvent.EventType.MESSAGE_UPDATE -> {
                 val position = messagesAdapter.indexBy(event.message ?: event.messageId ?: return log("Message update event have no message or messageId"))
