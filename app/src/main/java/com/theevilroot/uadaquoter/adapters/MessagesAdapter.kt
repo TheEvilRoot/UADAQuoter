@@ -10,7 +10,7 @@ import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.utils.bindView
 
-class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
+class MessagesAdapter(private val updateMessagesBadgeFunction: () -> Unit): RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
 
     private val messages: ArrayList<Message> = ArrayList()
 
@@ -26,12 +26,16 @@ class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
         }
         messages.add(message)
         notifyItemInserted(messages.count() - 1)
+        updateMessagesBadgeFunction()
     }
 
     fun dismissMessage(position: Int) {
         messages.removeAt(position)
         notifyItemRemoved(position)
+        updateMessagesBadgeFunction()
     }
+
+    fun messagesCount(): Int = messages.count()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageHolder =
             MessageHolder(LayoutInflater.from(parent.context).inflate(R.layout.message_layout, parent, false), this::dismissMessage)

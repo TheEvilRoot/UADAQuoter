@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import cn.nekocode.badge.BadgeDrawable
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jetradar.permissions.PermissionsDeniedException
@@ -244,14 +245,14 @@ class MainActivity : AppCompatActivity() {
                            @DrawableRes icon: Int,
                            actions: List<MessageAction> = listOf(MessageAction()),
                            id: Int? = null) {
-        return messagesAdapter.addMessage(Message(title, message, color, icon, actions, id))
+        messagesAdapter.addMessage(Message(title, message, color, icon, actions, id))
     }
 
 
     /** UI setting up stuff **/
 
     private fun setupMessagesView() {
-        messagesAdapter = MessagesAdapter()
+        messagesAdapter = MessagesAdapter(this::updateMessagesBadge)
         messagesView.layoutManager = GridLayoutManager(this, 1)
         messagesView.adapter = messagesAdapter
         ItemTouchHelper(object: ItemTouchHelper.Callback() {
@@ -297,6 +298,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun updateMessagesBadge() {
+        val count = messagesAdapter.messagesCount()
+        if (count != 0) {
+            appbar.navigationIcon = BadgeDrawable.Builder()
+                    .type(BadgeDrawable.TYPE_NUMBER)
+                    .badgeColor(resources.getColor(android.R.color.holo_red_dark))
+                    .number(count)
+                    .build()
+        } else appbar.navigationIcon = null
     }
 
     /** System stuff **/
