@@ -128,7 +128,7 @@ object RxQuoterApi {
                 val result = quoter(mocked).all()
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(IOException(response.message()))
                 val quotes = response.body()!!
                 quotes.forEach(it::onNext)
                 it.onComplete()
