@@ -2,13 +2,13 @@ package com.theevilroot.uadaquoter.utils
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
 
 
 fun <T: View> Activity.bind(@IdRes id: Int): Lazy<T> =

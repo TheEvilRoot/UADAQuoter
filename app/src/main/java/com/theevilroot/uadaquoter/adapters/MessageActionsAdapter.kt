@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
-import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.objects.MessageAction
-import com.theevilroot.uadaquoter.utils.bindView
 import com.theevilroot.uadaquoter.objects.MessageActionType.*
+import com.theevilroot.uadaquoter.utils.bindView
 import com.theevilroot.uadaquoter.utils.openInBrowser
 
 class MessageActionsAdapter(private val message: Message, private val holder: MessagesAdapter.MessageHolder): RecyclerView.Adapter<MessageActionsAdapter.MessageActionHolder>() {

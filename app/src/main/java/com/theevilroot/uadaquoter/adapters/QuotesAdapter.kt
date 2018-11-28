@@ -9,7 +9,8 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.GsonBuilder
-import com.theevilroot.uadaquoter.*
+import com.theevilroot.uadaquoter.App
+import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.activities.EditQuoteActivity
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.bindView

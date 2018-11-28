@@ -6,7 +6,8 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
-import com.theevilroot.uadaquoter.*
+import com.theevilroot.uadaquoter.App
+import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
 import daio.io.dresscode.matchDressCode

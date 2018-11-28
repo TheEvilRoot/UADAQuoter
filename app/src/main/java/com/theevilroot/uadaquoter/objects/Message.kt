@@ -1,6 +1,5 @@
 package com.theevilroot.uadaquoter.objects
 
-import android.net.Uri
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 

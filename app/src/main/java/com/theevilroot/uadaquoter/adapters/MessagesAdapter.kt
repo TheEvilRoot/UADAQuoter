@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.utils.bindView
 
 class MessagesAdapter(private val updateMessagesBadgeFunction: () -> Unit): RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {

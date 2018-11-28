@@ -13,7 +13,6 @@ import androidx.appcompat.app.AlertDialog
 import com.google.gson.*
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.theevilroot.uadaquoter.objects.Quote
-import com.theevilroot.uadaquoter.objects.TextWatcherWrapper
 import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import io.reactivex.Completable
 import io.reactivex.Observable

@@ -1,28 +1,23 @@
 package com.theevilroot.uadaquoter.activities
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonParser
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
-import com.theevilroot.uadaquoter.*
+import com.theevilroot.uadaquoter.App
+import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
-import com.theevilroot.uadaquoter.utils.showAdderNameDialog
-import com.theevilroot.uadaquoter.utils.showPINDialog
 import daio.io.dresscode.matchDressCode
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Function
-import io.reactivex.functions.Function3
 import io.reactivex.schedulers.Schedulers
-import java.lang.Exception
 
 class EditQuoteActivity : AppCompatActivity() {
 

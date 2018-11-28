@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -23,7 +21,8 @@ import cn.nekocode.badge.BadgeDrawable
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jetradar.permissions.PermissionsDeniedException
-import com.theevilroot.uadaquoter.*
+import com.theevilroot.uadaquoter.App
+import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.adapters.MessagesAdapter
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.objects.Message
