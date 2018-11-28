@@ -66,7 +66,7 @@ open class QuotesAdapter: RecyclerView.Adapter<QuotesAdapter.QuoteViewHolder>() 
                 itemView.context.startActivity(intent)
             }
             shareAction.setOnClickListener {
-                // QuoterApi.shareQuote(itemView.context, quote)
+                App.instance.api.share(itemView.context, quote)
             }
         }
     }

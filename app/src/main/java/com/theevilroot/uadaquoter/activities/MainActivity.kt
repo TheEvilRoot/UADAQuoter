@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -30,6 +31,7 @@ import com.theevilroot.uadaquoter.objects.MessageAction
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
+import com.theevilroot.uadaquoter.utils.log
 import daio.io.dresscode.dressCodeStyleId
 import daio.io.dresscode.matchDressCode
 import io.reactivex.Completable
@@ -63,6 +65,7 @@ class MainActivity : AppCompatActivity() {
     private val mIdFirstRun = 4
     private val mIdQuotesLoaded = 5
     private val mIdServiceUnavailable = 6
+    private val mIdCacheError = 7
 
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDressCode()
@@ -160,6 +163,12 @@ class MainActivity : AppCompatActivity() {
                 }) {
                     hideLoading()
                     addQuotesLoadedMessage()
+                    api.setCache(App.instance.quotes)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({
+                                log("Cache saved")
+                            }, this::addCacheErrorMessage)
                 })
     }
 
@@ -237,6 +246,14 @@ class MainActivity : AppCompatActivity() {
                 android.R.color.holo_red_dark,
                 R.drawable.ic_trash_can,
                 id = mIdServiceUnavailable)
+    }
+
+    private fun addCacheErrorMessage(t: Throwable) {
+        addMessage("CacheError",
+                "CacheErrorMessage\n${t.localizedMessage}",
+                android.R.color.holo_red_dark,
+                R.drawable.ic_trash_can,
+                id = mIdCacheError)
     }
 
     private fun addMessage(title: String,

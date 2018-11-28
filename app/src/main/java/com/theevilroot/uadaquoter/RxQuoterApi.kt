@@ -236,7 +236,7 @@ object RxQuoterApi {
             try {
                 val file = File(filesDir, "cache.json")
                 if (!file.exists() && !file.createNewFile())
-                    return@create it.onError(IOException())
+                    return@create it.onError(IOException("Cannot create cache file"))
                 val array = JsonArray()
                 val root = JsonObject()
                 quotes.map(Quote::toJson).forEach(array::add)

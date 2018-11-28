@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonObject
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 
 
 fun <T: View> Activity.bind(@IdRes id: Int): Lazy<T> =
@@ -34,4 +35,8 @@ fun Context.openInBrowser(uri: Uri) {
     val intent = Intent(Intent.ACTION_VIEW)
     intent.data = uri
     startActivity(intent)
+}
+
+fun Context.log(msg: String) {
+    Log.i(this::class.java.simpleName, msg)
 }
