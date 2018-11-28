@@ -278,14 +278,14 @@ object RxQuoterApi {
         /**
          *  @param context - Context to show dialog
          */
-        fun showSecurityDialog(context: Context): Single<String> = Single.create <String> {
+        fun showSecurityDialog(context: Context, validator: (String) -> Boolean): Single<String> = Single.create <String> {
             val view = LayoutInflater.from(context).inflate(R.layout.security_code_dialog_layout, null, false)
             val dialog = AlertDialog.Builder(context).setView(view).create()
             val pinView = view.findViewById<EditText>(R.id.security_code_field)
 
             val disposable = pinView.textChanges()
                     .map(CharSequence::toString)
-                    .filter(App.instance.references::isKeyValid)
+                    .filter(validator)
                     .subscribe { key ->
                         it.onSuccess(key)
                         dialog.dismiss()

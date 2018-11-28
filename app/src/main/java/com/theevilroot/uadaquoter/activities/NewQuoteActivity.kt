@@ -53,9 +53,9 @@ class NewQuoteActivity: AppCompatActivity() {
             val adder = adderView.text.toString()
             val quote = quoteView.text.toString()
 
-            compositeDisposable.add(api.showSecurityDialog(this@NewQuoteActivity)
+            compositeDisposable.add(api.showSecurityDialog(this@NewQuoteActivity, App.instance.references.getPostfix()::equals)
                     .subscribe({ key ->
-                        compositeDisposable.add(api.add(key, adder, author, quote)
+                        compositeDisposable.add(api.add(App.instance.references.getPrefix() + key, adder, author, quote)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(this::showSuccess, this::showError))

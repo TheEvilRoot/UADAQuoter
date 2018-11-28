@@ -65,9 +65,9 @@ class EditQuoteActivity : AppCompatActivity() {
             val editor = adderView.text.toString()
             val text = quoteView.text.toString()
 
-            compositeDisposable.add(api.showSecurityDialog(this@EditQuoteActivity)
+            compositeDisposable.add(api.showSecurityDialog(this@EditQuoteActivity, App.instance.references.getPostfix()::equals)
                     .subscribe({ key ->
-                        compositeDisposable.add(api.edit(key, quote.id, editor, text)
+                        compositeDisposable.add(api.edit(App.instance.references.getPrefix() + key, quote.id, editor, text)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(this::showSuccess, this::showError))
