@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import cn.nekocode.badge.BadgeDrawable
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxbinding3.appcompat.navigationClicks
 import com.jetradar.permissions.PermissionsDeniedException
 import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.R
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
     private val mIdUserdataNotSpecified = 1
 
     private var isInitialized = false
+    private var isFirstMessage = true
 
     private val mIdPermissionDenied = 2
     private val mIdNetworkError = 3
@@ -294,6 +296,12 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
 
     /** UI setting up stuff **/
 
+    private fun toggleMessagesViewState() {
+        if (messagesView.isShown)
+            messagesView.visibility = View.GONE
+        else messagesView.visibility = View.VISIBLE
+    }
+
     private fun setupMessagesView() {
         messagesAdapter = MessagesAdapter()
         messagesView.layoutManager = GridLayoutManager(this, 1)
@@ -311,6 +319,10 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
                     dismissMessage(message)
             }
         }).attachToRecyclerView(messagesView)
+        appbar.setNavigationOnClickListener {
+            log("OnNavigationClick")
+            toggleMessagesViewState()
+        }
     }
 
 
