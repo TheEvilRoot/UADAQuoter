@@ -32,7 +32,7 @@ import java.io.IOException
 
 object RxQuoterApi {
 
-    private const val backendUrl = "http://192.168.0.100:6741/api/quote/"
+    private const val backendUrl = "http://52.48.142.75:6741/api/quote/"
     private const val defaultHeader = "Connection: close"
 
     private val retrofit = Retrofit.Builder()
