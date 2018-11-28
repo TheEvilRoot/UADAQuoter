@@ -27,6 +27,7 @@ import com.theevilroot.uadaquoter.adapters.MessagesAdapter
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
 import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.objects.MessageAction
+import com.theevilroot.uadaquoter.objects.MessageEvent
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
@@ -34,31 +35,32 @@ import com.theevilroot.uadaquoter.utils.log
 import daio.io.dresscode.dressCodeStyleId
 import daio.io.dresscode.matchDressCode
 import io.reactivex.Completable
+import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.io.FileNotFoundException
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
     private lateinit var imm: InputMethodManager
+
     private lateinit var quotesAdapter: QuotesAdapter
     private lateinit var messagesAdapter: MessagesAdapter
-
     private val appbar by bind<BottomAppBar>(R.id.app_bar)
+
     private val quotesView by bind<RecyclerView>(R.id.quotes_view)
-    private val loadingProcess by bind<ProgressBar>(R.id.progressBar)
     private val appbarButton by bind<FloatingActionButton>(R.id.app_bar_button)
     private val messagesView by bind<RecyclerView>(R.id.messages_view)
     private val loadingView by bind<View>(R.id.loading_view)
-
-    private var permissionGranted: Boolean = false
-
     private val permissionsDelegate = App.instance.permissionsActivityDelegate
+
     private val api = App.instance.api
     private val compositeDisposable = CompositeDisposable()
-
     private val mIdUserdataNotSpecified = 1
+
+    private var isInitialized = false
+
     private val mIdPermissionDenied = 2
     private val mIdNetworkError = 3
     private val mIdFirstRun = 4
@@ -69,14 +71,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDressCode()
         super.onCreate(savedInstanceState)
+        if (savedInstanceState != null)
+            isInitialized = savedInstanceState.getBoolean("isInitialized")
         setContentView(R.layout.activity_main)
         setSupportActionBar(appbar)
         permissionsDelegate.attach(this)
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         setupQuotesView()
         setupMessagesView()
-
-        checkPermissions()
+        subscribeMessages()
+        log(isInitialized.toString())
+        if (isInitialized)  {
+            hideLoading()
+            log("isInitialized = true. notifying adapters")
+            quotesAdapter.notifyDataSetChanged()
+            messagesAdapter.notifyDataSetChanged()
+        } else {
+            log("isInitialized = false. starting loading")
+            checkPermissions()
+        }
     }
 
     /** Main logic stuff **/
@@ -146,6 +159,7 @@ class MainActivity : AppCompatActivity() {
                 }) {
                     addQuotesLoadedMessage()
                     hideLoading()
+                    isInitialized = true
                 })
     }
 
@@ -162,6 +176,7 @@ class MainActivity : AppCompatActivity() {
                 }) {
                     hideLoading()
                     addQuotesLoadedMessage()
+                    isInitialized = true
                     api.setCache(App.instance.quotes)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -193,6 +208,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Messages stuff **/
+
+    private fun subscribeMessages() {
+        api.messagesService()
+                .subscribe(this)
+    }
 
     private fun addUserdataNotSpecifiedMessage() {
         addMessage("UserdataNotSpecified",
@@ -261,14 +281,21 @@ class MainActivity : AppCompatActivity() {
                            @DrawableRes icon: Int,
                            actions: List<MessageAction> = listOf(MessageAction()),
                            id: Int? = null) {
-        messagesAdapter.addMessage(Message(title, message, color, icon, actions, id))
+        api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_INSERT, message = Message(title, message, color, icon, actions, id)))
     }
 
+    private fun dismissMessage(msg: Message) {
+        api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_DELETE,message = msg))
+    }
+
+    private fun dismissMessages(withId: Int) {
+        api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_DELETE, messageId = withId))
+    }
 
     /** UI setting up stuff **/
 
     private fun setupMessagesView() {
-        messagesAdapter = MessagesAdapter(this::updateMessagesBadge)
+        messagesAdapter = MessagesAdapter()
         messagesView.layoutManager = GridLayoutManager(this, 1)
         messagesView.adapter = messagesAdapter
         ItemTouchHelper(object: ItemTouchHelper.Callback() {
@@ -279,10 +306,13 @@ class MainActivity : AppCompatActivity() {
                     true
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                messagesAdapter.dismissMessage(viewHolder.adapterPosition)
+                val message = App.instance.messages.getOrNull(viewHolder.adapterPosition)
+                if (message != null)
+                    dismissMessage(message)
             }
         }).attachToRecyclerView(messagesView)
     }
+
 
     private fun setupQuotesView() {
         quotesAdapter = QuotesAdapter()
@@ -316,15 +346,16 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun updateMessagesBadge() {
-        val count = messagesAdapter.messagesCount()
-        if (count != 0) {
+    private fun updateMessagesBadge(count: Int?) {
+        if (count == null) {
+            appbar.navigationIcon = null
+        } else {
             appbar.navigationIcon = BadgeDrawable.Builder()
                     .type(BadgeDrawable.TYPE_NUMBER)
                     .badgeColor(resources.getColor(android.R.color.holo_red_dark))
                     .number(count)
                     .build()
-        } else appbar.navigationIcon = null
+        }
     }
 
     /** System stuff **/
@@ -345,258 +376,65 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-   /** override fun onCreate(savedInstanceState: Bundle?) {
-        matchDressCode()
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(appbar)
-        imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("isInitialized", isInitialized)
+        super.onSaveInstanceState(outState)
+    }
 
-        // ================================================================
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        isInitialized = savedInstanceState.getBoolean("isInitialized")
+    }
 
-        setupQuotesView()
-        setupMessagesView()
-        checkPermission()
-
-
-        // ================================================================
-
-        permissionsDelegate.attach(this)
-        compositeDisposable.add(App.instance.butler.require(true,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                .subscribe({
-
-                }) {
-
-                })
-
+    override fun onComplete() {
 
     }
 
-    private fun checkPermission() {
-        if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED ||
-                PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
-            if(Build.VERSION.SDK_INT >= 23)
-                return requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
-        }
-        onPermissionGranted()
+    override fun onSubscribe(d: Disposable) {
+        compositeDisposable.add(d)
+        updateMessagesBadge(messagesAdapter.messagesCount())
     }
 
-    private fun setupMessagesView() {
-        messagesAdapter = MessagesAdapter()
-        messagesView.layoutManager = GridLayoutManager(this, 1)
-        messagesView.adapter = messagesAdapter
-        ItemTouchHelper(object: ItemTouchHelper.Callback() {
-            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+    override fun onNext(event: MessageEvent) {
+        when (event.eventType) {
+            MessageEvent.EventType.MESSAGE_INSERT -> {
+                if (event.message == null)
+                    return log("Attempt to add null message")
 
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
-                    false
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                messagesAdapter.dismissMessage(viewHolder.adapterPosition)
+                App.instance.messages.add(event.message)
+                messagesAdapter.notifyItemInserted(App.instance.messages.count() - 1)
+                updateMessagesBadge(messagesAdapter.messagesCount())
             }
-        }).attachToRecyclerView(messagesView)
-    }
+            MessageEvent.EventType.MESSAGE_UPDATE -> {
+                val position = messagesAdapter.indexBy(event.message ?: event.messageId ?: return log("Message update event have no message or messageId"))
+                        ?: return log("Attempt to update missing message")
 
-    private fun setupQuotesView() {
-        quotesAdapter = QuotesAdapter()
-        quotesView.layoutManager = GridLayoutManager(this, 1)
-        quotesView.adapter = quotesAdapter
-    }
+                if (event.newMessage == null)
+                    return log("Unable to update message on position $position because new message is null")
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-
-        // =================================================================================
-
-        when (requestCode) {
-            6741 -> if (grantResults.all { it == PermissionChecker.PERMISSION_GRANTED }) {
-                onPermissionGranted()
-            } else {
-                onPermissionDenied()
+                App.instance.messages[position] = event.newMessage
+                messagesAdapter.notifyItemChanged(position)
             }
-        }
+            MessageEvent.EventType.MESSAGE_DELETE -> {
+                val position = messagesAdapter.indexBy(event.message ?: event.messageId ?: return log("Message delete event have no message or messageId"))
+                        ?: return log("Attempt to delete missing message")
 
-        // =================================================================================
+                App.instance.messages.removeAt(position)
+                messagesAdapter.notifyItemRemoved(position)
 
-        permissionsDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        permissionsDelegate.detach()
-    }
-
-    private fun loadUserdata() {
-        if (QuoterApi.getAdderName(this).isBlank()) {
-            showAdderNameDialog(this, "", { editText, textView, alertDialog ->
-                if (editText.text.toString().isBlank()) {
-                    textView.text = "Введите что-нибудь, кроме ничего"
-                    return@showAdderNameDialog textView.setTextColor(resources.getColor(android.R.color.holo_red_light))
-                }
-                QuoterApi.setAdderName(this, editText.text.toString())
-                alertDialog.dismiss()
-            }, false)
-        }
-    }
-
-    private fun showLoading() {
-        quotesView.visibility = View.GONE
-        loadingProcess.visibility = View.VISIBLE
-    }
-
-    private fun hideLoading() {
-        loadingProcess.visibility = View.GONE
-    }
-
-    private fun showList() {
-        quotesView.visibility = View.VISIBLE
-        loadingProcess.visibility = View.GONE
-    }
-
-    private fun updateUI() {
-        runOnUiThread {
-            supportActionBar!!.title = getString(R.string.app_name)
-            supportActionBar!!.subtitle = "Загружено ${QuoterApi.quotes.size} цитат ${if (QuoterApi.quotes.isNotEmpty() &&  QuoterApi.quotes[0].cached) "из кэша" else ""}"
-            quotesAdapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun loadRemote() {
-        QuoterApi.getTotal({ count ->
-            QuoterApi.getFromTo(0, count, { quotes ->
-                QuoterApi.quotes.clear()
-                QuoterApi.quotes.addAll(quotes)
-                QuoterApi.saveCache(filesDir, {  }) {  }
-                runOnUiThread { showList() }
-                updateUI()
-            }, {
-                onRemoteError(it)
-            })
-        }) {
-            onRemoteError(it)
-        }
-    }
-
-    private fun onRemoteError(e: Throwable?) {
-        Log.e("onRemoteError", "", e)
-        QuoterApi.loadCache(filesDir, { quotes ->
-            QuoterApi.quotes.clear()
-            QuoterApi.quotes.addAll(quotes)
-            QuoterApi.quotes.sortBy { it.id }
-            runOnUiThread { showList() }
-            updateUI()
-        }) {
-
-            runOnUiThread(this::hideLoading)
-            if (it is FileNotFoundException) {
-                messagesAdapter.addMessage(Message("Первый запуск?",
-                        "Похоже у вас нет загруженных цитат, а сеть недоступна. Включите передачу данных или Wi-Fi что бы загрузить последние цитаты.",
-                        android.R.color.holo_green_dark,
-                        R.drawable.ic_trash_can, listOf(
-                        MessageAction("Включить Wi-Fi", MessageActionType.TYPE_ACTION, action = { context ->
-                            context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
-                            return@MessageAction true
-                        }),
-                        MessageAction("Попробовать снова", MessageActionType.TYPE_ACTION, action = { _ ->
-                            reload()
-                            return@MessageAction true
-                        }),
-                        MessageAction()
-                )))
-            }else {
-                messagesAdapter.addMessage(Message("Ошибка получение цитат", "Неудалось получить ни кэш цитат, ни обновить цитаты с сервера.\n${e?.localizedMessage}\n${it?.localizedMessage}", android.R.color.holo_red_dark, R.drawable.ic_trash_can, listOf(
-                        MessageAction("Попробовать снова", MessageActionType.TYPE_ACTION, action = { _ ->
-                            load()
-                            return@MessageAction true
-                        }),
-                        MessageAction("Отправить отчет", MessageActionType.TYPE_ACTION, action = { context ->
-                            val intent = Intent(Intent.ACTION_SENDTO)
-                            intent.type = "quote/plain"
-                            intent.putExtra(Intent.EXTRA_SUBJECT, "UADAQuoter report")
-                            intent.putExtra(Intent.EXTRA_TEXT, e?.message )
-                            intent.data = Uri.parse("mailto:theevilroot6741@gmail.com")
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(intent)
-                            return@MessageAction false
-                        }),
-                        MessageAction()
-                )))
+                val newCount = messagesAdapter.messagesCount()
+                updateMessagesBadge(
+                        if (newCount == 0)
+                            null
+                        else newCount
+                )
             }
         }
     }
 
-    private fun load() {
-        showLoading()
-        loadRemote()
+    override fun onError(e: Throwable) {
+        log("Message error: ")
+        e.printStackTrace()
     }
-
-    private fun reload(): Boolean {
-        if (permissionGranted) {
-            load()
-        } else {
-            if (Build.VERSION.SDK_INT >= 23) {
-                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 6741)
-                return true
-            }
-            val result = arrayOf(PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE))
-            if (result.all { it == PermissionChecker.PERMISSION_GRANTED }) {
-                onPermissionGranted()
-            } else {
-                onPermissionDenied()
-            }
-        }
-        return false
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_toolbar_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.tb_reload -> reload()
-            R.id.tb_add -> {
-               startActivity(Intent(this, NewQuoteActivity::class.java))
-            }
-            R.id.tb_test_light -> {
-                dressCodeStyleId = R.style.AppTheme_UADAFLight
-                matchDressCode()
-            }
-            R.id.tb_test_dark -> {
-                dressCodeStyleId = R.style.AppTheme_UADAFDark
-                matchDressCode()
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    private fun onPermissionGranted() {
-        load()
-        loadUserdata()
-        permissionGranted = true
-    }
-
-    private fun onPermissionDenied() {
-        hideLoading()
-        permissionGranted = false
-        messagesAdapter.addMessage(Message("Ошибка доступа", "У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя.", android.R.color.holo_red_dark, R.drawable.ic_trash_can, listOf(
-                MessageAction("Попробовать снова", MessageActionType.TYPE_ACTION, action = { _ ->
-                    reload()
-                })
-        )))
-    }
-
-    private fun addPermissionError() {
-        messagesAdapter.addMessage(Message("Ошибка доступа", "У приложения нет доступа к хранилищу на устройстве что-бы сохранять кэш и данные пользователя.", android.R.color.holo_red_dark, R.drawable.ic_trash_can, listOf(
-                MessageAction("Попробовать снова", MessageActionType.TYPE_ACTION, action = { _ ->
-
-                })
-        )))
-    } **/
 
 }

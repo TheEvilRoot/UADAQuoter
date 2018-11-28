@@ -6,11 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
-import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.objects.Message
+import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.objects.MessageAction
-import com.theevilroot.uadaquoter.objects.MessageActionType.*
 import com.theevilroot.uadaquoter.utils.bindView
+import com.theevilroot.uadaquoter.objects.MessageActionType.*
+import com.theevilroot.uadaquoter.objects.MessageEvent
 import com.theevilroot.uadaquoter.utils.openInBrowser
 
 class MessageActionsAdapter(private val message: Message, private val holder: MessagesAdapter.MessageHolder): RecyclerView.Adapter<MessageActionsAdapter.MessageActionHolder>() {
@@ -32,7 +34,9 @@ class MessageActionsAdapter(private val message: Message, private val holder: Me
             actionView.setOnClickListener {
                 when (messageAction.actionType) {
                     TYPE_DISMISS -> {
-                        holder.removeItemFunction(holder.adapterPosition)
+                        val message = App.instance.messages.getOrNull(holder.adapterPosition)
+                        if (message != null)
+                            App.instance.api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_DELETE, message = message))
                     }
                     TYPE_URI -> if (messageAction.uri != null) {
                         itemView.context.openInBrowser(messageAction.uri)
@@ -41,7 +45,11 @@ class MessageActionsAdapter(private val message: Message, private val holder: Me
                         itemView.context.startActivity(Intent(itemView.context, messageAction.activity))
                     }
                     TYPE_ACTION -> if (messageAction.action != null) {
-                        if (messageAction.action.invoke(holder.itemView.context)) holder.removeItemFunction(holder.adapterPosition)
+                        if (messageAction.action.invoke(holder.itemView.context)) {
+                            val message = App.instance.messages.getOrNull(holder.adapterPosition)
+                            if (message != null)
+                                App.instance.api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_DELETE, message = message))
+                        }
                     }
                 }
             }

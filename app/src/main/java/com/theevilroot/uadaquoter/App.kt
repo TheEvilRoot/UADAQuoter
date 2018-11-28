@@ -5,6 +5,7 @@ import android.net.Uri
 import com.jetradar.permissions.MrButler
 import com.jetradar.permissions.PermissionsActivityDelegate
 import com.theevilroot.uadaquoter.objects.License
+import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.references.PrivateReferences
 import daio.io.dresscode.DressCode
@@ -21,11 +22,11 @@ class App: Application() {
     )
 
     val quotes: ArrayList<Quote> = ArrayList()
+    val messages: ArrayList<Message> = ArrayList()
 
     val permissionsActivityDelegate = PermissionsActivityDelegate()
     val butler = MrButler(permissionsActivityDelegate)
     val references = PrivateReferences()
-
 
     lateinit var api: RxQuoterApi.QuoterServiceApi
 

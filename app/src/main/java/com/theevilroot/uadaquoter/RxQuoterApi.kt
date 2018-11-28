@@ -12,11 +12,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.google.gson.*
 import com.jakewharton.rxbinding3.widget.textChanges
+import com.theevilroot.uadaquoter.objects.Message
+import com.theevilroot.uadaquoter.objects.MessageEvent
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.DialogCanceledException
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -53,6 +57,14 @@ object RxQuoterApi {
         private val filesDir: File = context.filesDir
         private val gson: Gson = GsonBuilder().setPrettyPrinting().create()!!
         private val parser: JsonParser = JsonParser()
+        private val messagesService: Subject<MessageEvent> = PublishSubject.create()
+
+
+        /**
+         * @return Subject that emits messages
+         */
+        fun messagesService(): Subject<MessageEvent> =
+                messagesService
 
         /**
          *  @param pos - Position of requseting quote

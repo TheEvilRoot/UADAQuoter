@@ -6,47 +6,47 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.objects.Message
 import com.theevilroot.uadaquoter.utils.bindView
 
-class MessagesAdapter(private val updateMessagesBadgeFunction: () -> Unit): RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
+class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {
 
-    private val messages: ArrayList<Message> = ArrayList()
+    fun messagesCount(): Int = App.instance.messages.count()
 
-    fun addMessage(message: Message) {
-        if (message.uniqueID != null) {
-            for (index in messages.indices) {
-                if (messages[index].uniqueID == message.uniqueID) {
-                    messages[index] = message
-                    notifyItemChanged(index)
-                    return
-                }
-            }
+    fun indexByMessage(message: Message): Int? {
+        val index = App.instance.messages.indexOf(message)
+        if (index < 0)
+            return null
+        return index
+    }
+
+    fun indexById(id: Int): Int? {
+        val index = App.instance.messages.indexOfFirst { it.uniqueID == id }
+        if (index < 0)
+            return null
+        return index
+    }
+
+    fun indexBy(any: Any): Int? {
+        return when (any) {
+            is Int -> indexById(any)
+            is Message -> indexByMessage(any)
+            else -> null
         }
-        messages.add(message)
-        notifyItemInserted(messages.count() - 1)
-        updateMessagesBadgeFunction()
     }
-
-    fun dismissMessage(position: Int) {
-        messages.removeAt(position)
-        notifyItemRemoved(position)
-        updateMessagesBadgeFunction()
-    }
-
-    fun messagesCount(): Int = messages.count()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageHolder =
-            MessageHolder(LayoutInflater.from(parent.context).inflate(R.layout.message_layout, parent, false), this::dismissMessage)
+            MessageHolder(LayoutInflater.from(parent.context).inflate(R.layout.message_layout, parent, false))
 
     override fun getItemCount(): Int =
-            messages.count()
+            App.instance.messages.count()
 
     override fun onBindViewHolder(holder: MessageHolder, position: Int) =
-            holder.bind(messages[position])
+            holder.bind(App.instance.messages[position])
 
-    class MessageHolder(itemView: View, val removeItemFunction: (Int) -> Unit): RecyclerView.ViewHolder(itemView) {
+    class MessageHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
         private val titleView by bindView<TextView>(R.id.message_title)
         private val contentView by bindView<TextView>(R.id.message_content)
