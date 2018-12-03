@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter.objects
+package com.theevilroot.uadaquoter.objects.messages
 
 import android.app.Activity
 import android.content.Context

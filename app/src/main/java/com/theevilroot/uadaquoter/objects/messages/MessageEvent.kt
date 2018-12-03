@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter.objects
+package com.theevilroot.uadaquoter.objects.messages
 
 data class MessageEvent(
         val eventType: EventType,

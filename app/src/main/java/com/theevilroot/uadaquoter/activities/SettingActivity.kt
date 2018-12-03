@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter.activities
+package com.theevilroot.uadaquoter.ui.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

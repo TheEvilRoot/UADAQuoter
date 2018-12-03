@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter.activities
+package com.theevilroot.uadaquoter.ui.activities
 
 import android.Manifest
 import android.accounts.NetworkErrorException
@@ -10,7 +10,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.ProgressBar
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
@@ -20,17 +19,16 @@ import androidx.recyclerview.widget.RecyclerView
 import cn.nekocode.badge.BadgeDrawable
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.jakewharton.rxbinding3.appcompat.navigationClicks
 import com.jetradar.permissions.PermissionsDeniedException
 import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.adapters.MessagesAdapter
 import com.theevilroot.uadaquoter.adapters.QuotesAdapter
-import com.theevilroot.uadaquoter.objects.Message
-import com.theevilroot.uadaquoter.objects.MessageAction
-import com.theevilroot.uadaquoter.objects.MessageEvent
+import com.theevilroot.uadaquoter.objects.messages.Message
+import com.theevilroot.uadaquoter.objects.messages.MessageAction
+import com.theevilroot.uadaquoter.objects.messages.MessageEvent
 import com.theevilroot.uadaquoter.objects.Quote
-import com.theevilroot.uadaquoter.utils.DialogCanceledException
+import com.theevilroot.uadaquoter.utils.exceptions.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
 import com.theevilroot.uadaquoter.utils.log
 import daio.io.dresscode.dressCodeStyleId
@@ -287,7 +285,7 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
     }
 
     private fun dismissMessage(msg: Message) {
-        api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_DELETE,message = msg))
+        api.messagesService().onNext(MessageEvent(MessageEvent.EventType.MESSAGE_DELETE, message = msg))
     }
 
     private fun dismissMessages(withId: Int) {
@@ -306,21 +304,19 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
         messagesAdapter = MessagesAdapter()
         messagesView.layoutManager = GridLayoutManager(this, 1)
         messagesView.adapter = messagesAdapter
-        ItemTouchHelper(object: ItemTouchHelper.Callback() {
-            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-
+        val helper = ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean =
-                    true
+                    false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val message = App.instance.messages.getOrNull(viewHolder.adapterPosition)
                 if (message != null)
                     dismissMessage(message)
             }
-        }).attachToRecyclerView(messagesView)
+
+        })
+        helper.attachToRecyclerView(messagesView)
         appbar.setNavigationOnClickListener {
-            log("OnNavigationClick")
             toggleMessagesViewState()
         }
     }
@@ -364,7 +360,6 @@ class MainActivity : AppCompatActivity(), Observer<MessageEvent> {
         } else {
             appbar.navigationIcon = BadgeDrawable.Builder()
                     .type(BadgeDrawable.TYPE_NUMBER)
-                    .badgeColor(resources.getColor(android.R.color.holo_red_dark))
                     .number(count)
                     .build()
         }

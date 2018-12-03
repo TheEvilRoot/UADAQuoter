@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter
+package com.theevilroot.uadaquoter.api
 
 import android.content.Context
 import android.content.Intent
@@ -8,6 +8,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.utils.contains
+import com.theevilroot.uadaquoter.utils.exceptions.APIException
 import com.theevilroot.uadaquoter.utils.getOrDef
 import io.ktor.client.HttpClient
 import io.ktor.client.call.call
@@ -23,7 +24,7 @@ import java.io.IOException
 import java.net.URL
 
 @Deprecated("See RxQuoterApi")
-object QuoterApi {
+object  QuoterApi {
 
     var quotes = ArrayList<Quote>()
 
@@ -66,24 +67,24 @@ object QuoterApi {
 
     @Deprecated("See RxQuoterApi")
     fun getPos(pos: Int, onLoad: (Quote) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "pos", "pos" to pos.toString()), { json ->
-        if(arrayOf("error", "message", "data") !in json)
+        if (arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
-        if(json["error"].asBoolean)
+        if (json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
-        if(arrayOf("id", "author", "adder", "author", "quote", "edited_by", "edited_at") !in data)
+        if (arrayOf("id", "author", "adder", "author", "quote", "edited_by", "edited_at") !in data)
             return@req onError(APIException("Malformed response data"))
         onLoad(Quote.fromJson(data))
     }, onError)
 
     @Deprecated("See RxQuoterApi")
     fun getFromTo(from: Int, to: Int, onLoad: (List<Quote>) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "fromto", "from" to from.toString(), "to" to to.toString()), { json ->
-        if(arrayOf("error", "message", "data") !in json)
+        if (arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
-        if(json["error"].asBoolean)
+        if (json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
-        if("quotes" !in data)
+        if ("quotes" !in data)
             return@req onError(APIException("Malformed response data"))
         val quotes = data["quotes"].asJsonArray
         onLoad(quotes.map { it.asJsonObject }.map { Quote.fromJson(it) })
@@ -91,42 +92,42 @@ object QuoterApi {
 
     @Deprecated("See RxQuoterApi")
     fun getRandom(onLoad: (Quote) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "rand"), { json ->
-        if(arrayOf("error", "message", "data") !in json)
+        if (arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
-        if(json["error"].asBoolean)
+        if (json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
-        if(arrayOf("id", "author", "adder", "author", "quote", "edited_by", "edited_at") !in data)
+        if (arrayOf("id", "author", "adder", "author", "quote", "edited_by", "edited_at") !in data)
             return@req onError(APIException("Malformed response data"))
         onLoad(Quote.fromJson(data))
     }, onError)
 
     @Deprecated("See RxQuoterApi")
     fun getTotal(onLoad: (Int) -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "GET", "mode" to "total"), { json ->
-        if(arrayOf("error", "message", "data") !in json)
+        if (arrayOf("error", "message", "data") !in json)
             return@req onError(APIException("Malformed response"))
-        if(json["error"].asBoolean)
+        if (json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         val data = json["data"].asJsonObject
-        if("count" !in data)
+        if ("count" !in data)
             return@req onError(APIException("Malformed response data"))
         onLoad(data["count"].asInt)
     }, onError)
 
     @Deprecated("See RxQuoterApi")
     fun add(adder: String, author: String,quote: String ,key: String, onLoad: () -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "ADD", "key" to key, "author" to author, "adder" to adder, "quote" to quote), { json ->
-        if(arrayOf("error", "message") !in json)
+        if (arrayOf("error", "message") !in json)
             return@req onError(APIException("Malformed response"))
-        if(json["error"].asBoolean)
+        if (json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         onLoad()
     }, onError)
 
     @Deprecated("See RxQuoterApi")
     fun edit(id: Int, edited_by: String, quote: String, key: String, onLoad: () -> Unit, onError: (Throwable?) -> Unit) = req(backendUrl, mapOf("task" to "EDIT", "key" to key, "id" to id.toString(), "edited_by" to edited_by, "new_text" to quote), { json ->
-        if(arrayOf("error", "message") !in json)
+        if (arrayOf("error", "message") !in json)
             return@req onError(APIException("Malformed response"))
-        if(json["error"].asBoolean)
+        if (json["error"].asBoolean)
             return@req onError(APIException("Error: ${response_errors.getOrDef(json["message"].asString, json["message"].asString)}"))
         onLoad()
     }, onError)
@@ -181,7 +182,5 @@ object QuoterApi {
         intent.type = "text/plain"
         context.startActivity(intent)
     }
-
-    class APIException(msg: String): IOException(msg)
 
 }

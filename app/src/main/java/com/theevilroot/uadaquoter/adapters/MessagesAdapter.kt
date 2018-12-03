@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.R
-import com.theevilroot.uadaquoter.objects.Message
+import com.theevilroot.uadaquoter.objects.messages.Message
 import com.theevilroot.uadaquoter.utils.bindView
 
 class MessagesAdapter: RecyclerView.Adapter<MessagesAdapter.MessageHolder>() {

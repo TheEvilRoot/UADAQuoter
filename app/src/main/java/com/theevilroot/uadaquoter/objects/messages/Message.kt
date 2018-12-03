@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter.objects
+package com.theevilroot.uadaquoter.objects.messages
 
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes

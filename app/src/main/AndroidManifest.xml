@@ -18,15 +18,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.UADAF"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.MainActivity">
+        <activity android:name="com.theevilroot.uadaquoter.ui.activities.MainActivity">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.NewQuoteActivity"/>
-        <activity android:name=".activities.EditQuoteActivity"/>
-        <activity android:name=".activities.LicensesActivity" />
+        <activity android:name="com.theevilroot.uadaquoter.ui.activities.NewQuoteActivity"/>
+        <activity android:name="com.theevilroot.uadaquoter.ui.activities.EditQuoteActivity"/>
+        <activity android:name="com.theevilroot.uadaquoter.ui.activities.LicensesActivity" />
+        <activity android:name="com.theevilroot.uadaquoter.ui.activities.SettingActivity" />
 
         <receiver android:name=".widget.RandomQuoteWidgetProvider">
             <intent-filter>

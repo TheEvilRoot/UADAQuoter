@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter
+package com.theevilroot.uadaquoter.api
 
 import android.content.Context
 import android.content.Intent
@@ -12,10 +12,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.google.gson.*
 import com.jakewharton.rxbinding3.widget.textChanges
-import com.theevilroot.uadaquoter.objects.Message
-import com.theevilroot.uadaquoter.objects.MessageEvent
+import com.theevilroot.uadaquoter.R
+import com.theevilroot.uadaquoter.objects.messages.MessageEvent
 import com.theevilroot.uadaquoter.objects.Quote
-import com.theevilroot.uadaquoter.utils.DialogCanceledException
+import com.theevilroot.uadaquoter.utils.exceptions.APIException
+import com.theevilroot.uadaquoter.utils.exceptions.DialogCanceledException
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -67,15 +68,15 @@ object RxQuoterApi {
                 messagesService
 
         /**
-         *  @param pos - Position of requseting quote
-         *  @return Single of requesing quote
+         *  @param pos - Position of requesting quote
+         *  @return Single of requesting quote
          */
         fun getPos(pos: Int): Single<Quote> = Single.create<Quote> {
             try {
                 val result = quoter(mocked).pos(pos)
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(APIException("getPos request failed. ${response.code()}: ${response.errorBody()}"))
                 val quote = response.body()!!
                 it.onSuccess(quote)
             } catch (e: Exception) {
@@ -93,7 +94,7 @@ object RxQuoterApi {
                 val result = quoter(mocked).range(from, to)
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(APIException("getPos request failed. ${response.code()}: ${response.errorBody()}"))
                 val quotes = response.body()!!
                 quotes.forEach(it::onNext)
                 it.onComplete()
@@ -111,7 +112,7 @@ object RxQuoterApi {
                 val result = quoter(mocked).random(count)
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(APIException("getPos request failed. ${response.code()}: ${response.errorBody()}"))
                 val quotes = response.body()!!
                 quotes.forEach(it::onNext)
                 it.onComplete()
@@ -128,7 +129,7 @@ object RxQuoterApi {
                 val result = quoter(mocked).all()
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    return@create it.onError(IOException(response.message()))
+                    return@create it.onError(APIException("getPos request failed. ${response.code()}: ${response.errorBody()}"))
                 val quotes = response.body()!!
                 quotes.forEach(it::onNext)
                 it.onComplete()
@@ -145,7 +146,7 @@ object RxQuoterApi {
                 val result = quoter(mocked).total()
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(IOException())
                 val count = response.body()!!
                 it.onSuccess(count)
             } catch (e: Exception) {
@@ -165,7 +166,7 @@ object RxQuoterApi {
                 val result = quoter().add(key, adder, author, quote)
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(IOException())
                 it.onComplete()
             } catch (e: Exception) {
                 it.onError(e)
@@ -184,7 +185,7 @@ object RxQuoterApi {
                 val result = quoter().edit(key, id, editedBy, newText)
                 val response = result.execute()
                 if (!response.isSuccessful)
-                    it.onError(IOException())
+                    return@create it.onError(IOException())
                 it.onComplete()
             } catch (e: Exception) {
                 it.onError(e)
@@ -264,7 +265,7 @@ object RxQuoterApi {
          * @param context - Context to show dialog
          * @param defaultValue - String that will be showed in dialog on show
          * @param cancelable - Can dialog be canceled
-         * @return Single of String with entered username. Throws {@link com.theevilroot.uadaquoter.utils.DialogCanceledException} of user clicked cancel button or canceled dialog.
+         * @return Single of String with entered username. Throws {@link com.theevilroot.uadaquoter.utils.exceptions.DialogCanceledException} of user clicked cancel button or canceled dialog.
          */
         fun requestUserdata(context: Context, defaultValue: String, cancelable: Boolean = true): Single<String> = Single.create<String> { emitter ->
             val view = LayoutInflater.from(context).inflate(R.layout.personal_data, null, false)

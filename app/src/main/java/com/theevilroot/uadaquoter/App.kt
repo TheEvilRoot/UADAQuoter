@@ -4,8 +4,9 @@ import android.app.Application
 import android.net.Uri
 import com.jetradar.permissions.MrButler
 import com.jetradar.permissions.PermissionsActivityDelegate
+import com.theevilroot.uadaquoter.api.RxQuoterApi
 import com.theevilroot.uadaquoter.objects.License
-import com.theevilroot.uadaquoter.objects.Message
+import com.theevilroot.uadaquoter.objects.messages.Message
 import com.theevilroot.uadaquoter.objects.Quote
 import com.theevilroot.uadaquoter.references.PrivateReferences
 import daio.io.dresscode.DressCode

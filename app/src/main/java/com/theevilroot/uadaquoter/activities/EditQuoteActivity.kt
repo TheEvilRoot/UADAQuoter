@@ -1,4 +1,4 @@
-package com.theevilroot.uadaquoter.activities
+package com.theevilroot.uadaquoter.ui.activities
 
 import android.os.Bundle
 import android.widget.*
@@ -9,7 +9,7 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.theevilroot.uadaquoter.App
 import com.theevilroot.uadaquoter.R
 import com.theevilroot.uadaquoter.objects.Quote
-import com.theevilroot.uadaquoter.utils.DialogCanceledException
+import com.theevilroot.uadaquoter.utils.exceptions.DialogCanceledException
 import com.theevilroot.uadaquoter.utils.bind
 import daio.io.dresscode.matchDressCode
 import io.reactivex.Observable
